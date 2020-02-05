@@ -1,8 +1,8 @@
 import sys
-sys.path.append("../../checkers-python")
-sys.path.append("../../checkers-python/AI_Extensions")
-sys.path.append("../checkers-python")
-sys.path.append("../checkers-python/AI_Extensions")
+sys.path.append("../../connect-k-python")
+sys.path.append("../../connect-k-python/AI_Extensions")
+sys.path.append("../connect-k-python")
+sys.path.append("../connect-k-python/AI_Extensions")
 
 from GameLogic import GameLogic
 
