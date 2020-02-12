@@ -1,6 +1,6 @@
 import sys
-sys.path.append("../../connect-k-python")
-sys.path.append("../../connect-k-python/AI_Extensions")
+sys.path.append("../src/connect-k-python")
+sys.path.append("../src/connect-k-python/AI_Extensions")
 sys.path.append("../connect-k-python")
 sys.path.append("../connect-k-python/AI_Extensions")
 
