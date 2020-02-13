@@ -50,7 +50,7 @@ class StudentAI():
             self.player1 = PLAYER2
             self.player2 = PLAYER1
 
-        # help opponent move XD
+        # help your opponent move XD
         if move.col != -1 and move.row != -1:
             if self.g == 0:
                 self.myBoard.move(move.col, move.row, self.player2)
@@ -59,7 +59,10 @@ class StudentAI():
                 self.myBoard.move(move.col, move.row, self.player2)
 
         move = [-1, -1]
+        # h is always MIN_VALUE, since it must be MAX_TURN
         h = MIN_VALUE
+
+        # g = 1 has gravity, 0 no gravity
         if self.g == 0:
             for i in range(self.col):
                 for j in range(self.row):
@@ -98,13 +101,14 @@ class StudentAI():
             self.myBoard.move(move[0], move[1], self.player1)
             return Move(move[0], 0)
 
-    def heuristic(self):
+    def heuristic_random(self):
         return randint(-100000, 100000)
 
     def minimax(self, cur_depth, turn):
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            return self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            # return self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            return self.heuristic_random()
 
         # in level 1, do not loop
         if cur_depth == 0:
@@ -134,23 +138,12 @@ class StudentAI():
 
             return h
 
-                    # not valid return MIN OR MAX value, attention turn is current turn
-                    # else:
-                    #     if turn == MAX_TURN:
-                    #         return MAX_VALUE
-                    #     else:
-                    #         return MIN_VALUE
-
         else:
             for i in range(self.col):
                 j = self.myBoard.get_row_with_g(i)
 
                 if j == -1:
                     continue
-                    # if turn == MAX_TURN:
-                    #     return MAX_VALUE
-                    # else:
-                    #     return MIN_VALUE
 
                 # make move
                 self.myBoard.move(i, j, self.player1)
