@@ -24,6 +24,7 @@ class StudentAI():
     row = 0
     k = 0
     g = 0
+    # player1 is me, player 2 is opponent
     player1 = -1
     player2 = -1
 
@@ -126,14 +127,39 @@ class StudentAI():
                         # clear move
                         self.myBoard.clear_move(i, j)
 
-                        return h
+            return h
 
                     # not valid return MIN OR MAX value, attention turn is current turn
-                    else:
-                        if turn == MAX_TURN:
-                            return MAX_VALUE
-                        else:
-                            return MIN_VALUE
+                    # else:
+                    #     if turn == MAX_TURN:
+                    #         return MAX_VALUE
+                    #     else:
+                    #         return MIN_VALUE
+
+        else:
+            for i in range(self.col):
+                j = self.myBoard.get_row_with_g(i)
+
+                if j == -1:
+                    continue
+                    # if turn == MAX_TURN:
+                    #     return MAX_VALUE
+                    # else:
+                    #     return MIN_VALUE
+
+                # make move
+                self.myBoard.move(i, j, self.player1)
+
+                if turn == MAX_TURN:
+                    h = max(self.minimax(cur_depth + 1, MIN_TURN), h)
+
+                else:
+                    h = min(self.minimax(cur_depth + 1, MAX_TURN), h)
+
+                # clear move
+                self.myBoard.clear_move(i, j)
+
+            return h
 
     def deepcopy_board(self):
         for i in range(self.col):
