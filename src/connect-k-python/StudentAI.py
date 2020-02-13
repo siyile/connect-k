@@ -16,8 +16,30 @@ class StudentAI():
         self.k = k
         self.board = Board(col,row,k,g)
 
-    def get_move(self,move):
+    def get_move(self, move):
         if self.g == 0:
             return Move(randint(0,self.col-1),randint(0,self.row-1))
         else:
             return Move(randint(0,self.col-1),0)
+
+    def herustic(self):
+        return;
+
+    def minimax(self, curDepth, nodeIndex,
+                maxTurn, scores,
+                targetDepth):
+        # base case : targetDepth reached
+        if (curDepth == targetDepth):
+            return scores[nodeIndex]
+
+        if (maxTurn):
+            return max(minimax(curDepth + 1, nodeIndex * 2,
+                               False, scores, targetDepth),
+                       minimax(curDepth + 1, nodeIndex * 2 + 1,
+                               False, scores, targetDepth))
+
+        else:
+            return min(minimax(curDepth + 1, nodeIndex * 2,
+                               True, scores, targetDepth),
+                       minimax(curDepth + 1, nodeIndex * 2 + 1,
+                               True, scores, targetDepth))
