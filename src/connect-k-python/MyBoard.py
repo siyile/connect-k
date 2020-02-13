@@ -19,6 +19,15 @@ class MyBoard(Board):
             raise InvalidMoveError()
         self.board[row][col] = player
 
+    def is_valid_move(self,col,row,check_space=True):
+        if col < 0 or col >= self.col:
+            return False
+        if row < 0 or row >= self.row:
+            return False
+        if check_space and self.board[row][col] != 0:
+            return False
+        return True
+
     def get_row_with_g(self, col):
         for i in range(self.row - 1, -1, -1):
             if self.check_space(col, i):

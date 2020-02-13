@@ -16,7 +16,7 @@ CLEAR: int = 0
 MIN_TURN: int = 0
 MAX_TURN: int = 1
 
-weights: List[float] = [1, -1, 0, 0, 0, 0]
+WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
 
 
 class StudentAI():
@@ -35,20 +35,25 @@ class StudentAI():
         self.k = k
         self.board = Board(col, row, k, g)
         self.myBoard = MyBoard(col, row, k, g)
-        self.heuristic = Heuristic(weights)
+        self.heuristic = Heuristic(WEIGHTS)
 
     def get_move(self, move):
-        if self.player1 == -1 and move.col == -1:
-            self.player1 = PLAYER1
-            self.player2 = PLAYER2
+        if self.player1 == -1:
+            if move.col == -1:
+                self.player1 = PLAYER1
+                self.player2 = PLAYER2
 
-            if self.g == 1:
-                return Move(self.col // 2, 0)
+                if self.g == 1:
+                    move = [self.col // 2, 0]
+                    self.myBoard.move(move[0], move[1], self.player1)
+                    return Move(move[0], move[1])
+                else:
+                    move = [self.col // 2, self.row // 2]
+                    self.myBoard.move(move[0], move[1], self.player1)
+                    return Move(move[0], move[1])
             else:
-                return Move(self.col // 2, self.row // 2)
-        else:
-            self.player1 = PLAYER2
-            self.player2 = PLAYER1
+                self.player1 = PLAYER2
+                self.player2 = PLAYER1
 
         # help your opponent move XD
         if move.col != -1 and move.row != -1:
@@ -56,7 +61,7 @@ class StudentAI():
                 self.myBoard.move(move.col, move.row, self.player2)
             else:
                 r = self.myBoard.get_row_with_g(move.col)
-                self.myBoard.move(move.col, move.row, self.player2)
+                self.myBoard.move(move.col, r, self.player2)
 
         move = [-1, -1]
         # h is always MIN_VALUE, since it must be MAX_TURN
@@ -107,8 +112,8 @@ class StudentAI():
     def minimax(self, cur_depth, turn):
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            # return self.heuristic.eval_board(Player(self.player1), self.myBoard)
-            return self.heuristic_random()
+            return self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            # return self.heuristic_random()
 
         # in level 1, do not loop
         if cur_depth == 0:
@@ -138,6 +143,7 @@ class StudentAI():
 
             return h
 
+        # no gravity
         else:
             for i in range(self.col):
                 j = self.myBoard.get_row_with_g(i)
