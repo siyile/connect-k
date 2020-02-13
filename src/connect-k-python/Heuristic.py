@@ -55,7 +55,7 @@ class Heuristic:
                 can_win = True
                 for delta in range(board.k):
                     val = board.board[x][y + delta] if horizontal else board.board[x + delta][y]
-                    if val == player.opposite:
+                    if val == player.opposite.value:
                         can_win = False
                         break
                 if can_win:
@@ -74,7 +74,7 @@ class Heuristic:
             for start_y in range_col:
                 can_win = True
                 for delta in range(board.k):
-                    if board.board[start_x + dx * delta][start_y + dy * delta] == player.opposite:
+                    if board.board[start_x + dx * delta][start_y + dy * delta] == player.opposite.value:
                         can_win = False
                         break
                 if can_win:
@@ -83,6 +83,8 @@ class Heuristic:
 
 
 if __name__ == "__main__":
-    b = Board(4, 3, 2, 0)
-    h = Heuristic([1, 0, 0, 0, 0, 0])
+    b = Board(3, 3, 2, 0)
+    b.board[0][0] = 1
+    b.board[1][0] = 1
+    h = Heuristic([1, -1, 0, 0, 0, 0])
     print(h.eval_board(Player(1), b))
