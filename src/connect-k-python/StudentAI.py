@@ -7,14 +7,14 @@ from Heuristic import *
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
 
-MIN_VALUE: int = -99999999
-MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 2
-PLAYER1: int = 1
-PLAYER2: int = 2
-CLEAR: int = 0
-MIN_TURN: int = 0
-MAX_TURN: int = 1
+MIN_VALUE = 99999999
+MAX_VALUE = 99999999
+TARGET_DEPTH = 2
+PLAYER1 = 1
+PLAYER2 = 2
+CLEAR = 0
+MIN_TURN = 0
+MAX_TURN = 1
 
 WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
 
