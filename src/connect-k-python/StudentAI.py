@@ -2,18 +2,21 @@ from random import randint
 from BoardClasses import Move
 from BoardClasses import Board
 from MyBoard import MyBoard
+from Heuristic import *
 
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
 
-MIN_VALUE: int = -999999
-MAX_VALUE: int = 999999
-TARGET_DEPTH: int = 5
+MIN_VALUE: int = -99999999
+MAX_VALUE: int = 99999999
+TARGET_DEPTH: int = 2
 PLAYER1: int = 1
 PLAYER2: int = 2
 CLEAR: int = 0
 MIN_TURN: int = 0
 MAX_TURN: int = 1
+
+weights: List[float] = [1, -1, 0, 0, 0, 0]
 
 
 class StudentAI():
@@ -31,6 +34,7 @@ class StudentAI():
         self.k = k
         self.board = Board(col, row, k, g)
         self.myBoard = MyBoard(col, row, k, g)
+        self.heuristic = Heuristic(weights)
 
     def get_move(self, move):
         if self.player1 == -1 and move.col == -1:
@@ -55,6 +59,7 @@ class StudentAI():
                 for j in range(self.row):
                     if not self.myBoard.is_valid_move(i, j, True):
                         continue
+
                     self.myBoard.move(i, j, self.player1)
 
                     h_star = self.minimax(0, MAX_TURN)
@@ -70,6 +75,7 @@ class StudentAI():
         else:
             for i in range(self.col):
                 j = self.myBoard.get_row_with_g(i)
+
                 if j == -1:
                     continue
 
@@ -87,12 +93,12 @@ class StudentAI():
             return Move(move[0], 0)
 
     def heuristic(self):
-        return randint(-1000, 1000)
+        return randint(-100000, 100000)
 
     def minimax(self, cur_depth, turn):
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            return self.heuristic()
+            return self.heuristic.eval_board(Player(self.player1), self.myBoard)
 
         # in level 1, do not loop
         if cur_depth == 0:
@@ -122,12 +128,12 @@ class StudentAI():
 
                         return h
 
-                    # not valid return MIN OR MAX value
+                    # not valid return MIN OR MAX value, attention turn is current turn
                     else:
-                        if turn:
-                            return MIN_VALUE
-                        else:
+                        if turn == MAX_TURN:
                             return MAX_VALUE
+                        else:
+                            return MIN_VALUE
 
     def deepcopy_board(self):
         for i in range(self.col):
