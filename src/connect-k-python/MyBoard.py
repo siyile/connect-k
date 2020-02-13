@@ -20,7 +20,7 @@ class MyBoard(Board):
         self.board[row][col] = player
 
     def get_row_with_g(self, col):
-        for i in range(self.row, -1, -1):
+        for i in range(self.row - 1, -1, -1):
             if self.check_space(col, i):
                 return i
         return -1

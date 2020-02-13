@@ -40,6 +40,11 @@ class StudentAI():
         if self.player1 == -1 and move.col == -1:
             self.player1 = PLAYER1
             self.player2 = PLAYER2
+
+            if self.g == 1:
+                return Move(self.col // 2, 0)
+            else:
+                return Move(self.col // 2, self.row // 2)
         else:
             self.player1 = PLAYER2
             self.player2 = PLAYER1
