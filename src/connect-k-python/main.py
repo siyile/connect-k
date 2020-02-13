@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
             col, row, k,g, order = rule
 
-            main = GameLogic(col, row, k,g, 'n', debug=True)
+            main = GameLogic(col, row, k, g, 'n', debug=True)
             try:
                 main.Run(mode=host_flag, ai_path=ai_path, info=response, time=1200)
             except:
