@@ -9,7 +9,7 @@ from Heuristic import *
 
 MIN_VALUE: int = -99999999
 MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 5
+TARGET_DEPTH: int = 10
 PLAYER1: int = 1
 PLAYER2: int = 2
 CLEAR: int = 0
@@ -18,6 +18,7 @@ MAX_TURN: int = 1
 PURE_MODE: int = 0
 AB_MODE: int = 1
 MODE: int = 1
+RANDOM: bool = False
 
 WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
 
@@ -92,8 +93,8 @@ class StudentAI():
         """
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            # return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
-            return [], heuristic_random()
+            if cur_depth == TARGET_DEPTH:
+                return self.cal_heru()
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
 
@@ -152,8 +153,7 @@ class StudentAI():
         """
         # check if is target
         if cur_depth == TARGET_DEPTH:
-            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
-            # return [], heuristic_random()
+            return self.cal_heru()
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
@@ -219,3 +219,9 @@ class StudentAI():
         self.myBoard.clear_move(col, row)
 
         return break_flag, move, h, alpha, beta
+
+    def cal_heru(self):
+        if RANDOM:
+            return [], heuristic_random()
+        else:
+            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
