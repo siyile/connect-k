@@ -15,8 +15,15 @@ PLAYER2: int = 2
 CLEAR: int = 0
 MIN_TURN: int = 0
 MAX_TURN: int = 1
+PURE_MODE: int = 0
+AB_MODE: int = 1
+MODE: int = 1
 
 WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
+
+
+def heuristic_random():
+    return randint(-100000, 100000)
 
 
 class StudentAI():
@@ -64,60 +71,27 @@ class StudentAI():
                 self.myBoard.move(move.col, r, self.player2)
 
         move = [-1, -1]
-        # h is always MIN_VALUE, since it must be MAX_TURN
-        h = MIN_VALUE
+
+        if MODE == PURE_MODE:
+            move, _ = self.pure_minimax(0, MAX_TURN, move)
+        else:
+            move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
 
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
-            for i in range(self.col):
-                for j in range(self.row):
-                    if not self.myBoard.is_valid_move(i, j, True):
-                        continue
-
-                    self.myBoard.move(i, j, self.player1)
-
-                    h_star = self.minimax(0, MAX_TURN)
-                    if h_star > h:
-                        move[0] = i
-                        move[1] = j
-                        h = h_star
-
-                    self.myBoard.clear_move(i, j)
-
-            self.myBoard.move(move[0], move[1], self.player1)
             return Move(move[0], move[1])
+        # no gravity
         else:
-            for i in range(self.col):
-                j = self.myBoard.get_row_with_g(i)
-
-                if j == -1:
-                    continue
-
-                self.myBoard.move(i, j, self.player1)
-
-                h_star = self.minimax(0, MAX_TURN)
-                if h_star > h:
-                    move[0] = i
-                    move[1] = j
-                    h = h_star
-
-                self.myBoard.clear_move(i, j)
-
-            self.myBoard.move(move[0], move[1], self.player1)
             return Move(move[0], 0)
 
-    def heuristic_random(self):
-        return randint(-100000, 100000)
-
-    def minimax(self, cur_depth, turn):
+    def pure_minimax(self, cur_depth, turn, move):
+        """
+        :return: move, h
+        """
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            return self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
             # return self.heuristic_random()
-
-        # in level 1, do not loop
-        if cur_depth == 0:
-            return self.minimax(cur_depth + 1, MIN_TURN)
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
 
@@ -127,21 +101,9 @@ class StudentAI():
         if self.g == 0:
             for i in range(self.col):
                 for j in range(self.row):
-                    # if current move valid
+                    # update move only when valid
                     if self.myBoard.is_valid_move(i, j, True):
-                        # make move
-                        self.myBoard.move(i, j, player)
-
-                        if turn == MAX_TURN:
-                            h = max(self.minimax(cur_depth + 1, MIN_TURN), h)
-
-                        else:
-                            h = min(self.minimax(cur_depth + 1, MAX_TURN), h)
-
-                        # clear move
-                        self.myBoard.clear_move(i, j)
-
-            return h
+                        move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
 
         # no gravity
         else:
@@ -151,21 +113,99 @@ class StudentAI():
                 if j == -1:
                     continue
 
-                # make move
-                self.myBoard.move(i, j, self.player1)
+                move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
 
-                if turn == MAX_TURN:
-                    h = max(self.minimax(cur_depth + 1, MIN_TURN), h)
+        return move, h
 
-                else:
-                    h = min(self.minimax(cur_depth + 1, MAX_TURN), h)
+    def pure_update_move_h(self, col, row, move, h, turn, cur_depth, player):
+        # make move
+        self.myBoard.move(col, row, player)
 
-                # clear move
-                self.myBoard.clear_move(i, j)
+        if turn == MAX_TURN:
+            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN)
+            if h_star > h:
+                move[0] = col
+                move[1] = row
+                h = h_star
 
-            return h
+        else:
+            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN)
+            if h_star < h:
+                move[0] = col
+                move[1] = row
+                h = h_star
 
-    def deepcopy_board(self):
-        for i in range(self.col):
-            for j in range(self.row):
-                self.myBoard.board[j][i] = self.board.board[j][i]
+        # clear move
+        self.myBoard.clear_move(col, row)
+
+        return move, h
+
+    def ab_minimax(self, cur_depth, turn, alpha, beta, move):
+        """
+        :return: move, h
+        """
+        # check if is target
+        if cur_depth == TARGET_DEPTH:
+            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            # return self.heuristic_random()
+
+        h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
+        player = self.player1 if turn == MAX_TURN else self.player2
+
+        break_flag: bool = False
+
+        if self.g == 0:
+            for i in range(self.col):
+                for j in range(self.row):
+                    if self.myBoard.is_valid_move(i, j, True):
+                        break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth, player)
+                        if break_flag:
+                            break
+                if break_flag:
+                    break
+
+        else:
+            for i in range(self.col):
+                j = self.myBoard.get_row_with_g(i)
+                if j == -1:
+                    continue
+
+                break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth, player)
+                if break_flag:
+                    break
+
+        return move, h
+
+    def ab_update_move_h(self, col, row, move, h, alpha, beta, turn, cur_depth, player):
+        break_flag: bool = False
+
+        # make move
+        self.myBoard.move(col, row, player)
+
+        if turn == MAX_TURN:
+            _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
+
+            if h_star > h:
+                h = h_star
+                move[0] = col
+                move[1] = row
+
+            alpha = max(alpha, h_star)
+        # MIN_TURN
+        else:
+            _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
+
+            if h_star < h:
+                h = h_star
+                move[0] = col
+                move[1] = row
+
+            beta = min(beta, h_star)
+
+        if beta <= alpha:
+            break_flag = True
+
+        # clear move
+        self.myBoard.clear_move(col, row)
+
+        return break_flag, move, h, alpha, beta
