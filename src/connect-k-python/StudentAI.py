@@ -9,7 +9,7 @@ from Heuristic import *
 
 MIN_VALUE: int = -99999999
 MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 3
+TARGET_DEPTH: int = 5
 PLAYER1: int = 1
 PLAYER2: int = 2
 CLEAR: int = 0
@@ -78,7 +78,7 @@ class StudentAI():
             move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
 
         self.myBoard.move(move[0], move[1], self.player1)
-        
+
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
             return Move(move[0], move[1])
@@ -92,8 +92,8 @@ class StudentAI():
         """
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
-            # return self.heuristic_random()
+            # return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            return [], heuristic_random()
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
 
@@ -101,15 +101,19 @@ class StudentAI():
 
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
-            for i in range(self.col):
-                for j in range(self.row):
+            for a in range(self.col):
+                i = (self.col + (~a, a)[a % 2]) // 2
+                for b in range(self.row):
+                    j = (self.row + (~b, b)[b % 2]) // 2
                     # update move only when valid
                     if self.myBoard.is_valid_move(i, j, True):
                         move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
 
         # no gravity
         else:
-            for i in range(self.col):
+            for a in range(self.col):
+                i = (self.col + (~a, a)[a % 2]) // 2
+
                 j = self.myBoard.get_row_with_g(i)
 
                 if j == -1:
@@ -149,7 +153,7 @@ class StudentAI():
         # check if is target
         if cur_depth == TARGET_DEPTH:
             return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
-            # return self.heuristic_random()
+            # return [], heuristic_random()
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
@@ -157,8 +161,10 @@ class StudentAI():
         break_flag: bool = False
 
         if self.g == 0:
-            for i in range(self.col):
-                for j in range(self.row):
+            for a in range(self.col):
+                i = (self.col + (~a, a)[a % 2]) // 2
+                for b in range(self.row):
+                    j = (self.row + (~b, b)[b % 2]) // 2
                     if self.myBoard.is_valid_move(i, j, True):
                         break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth, player)
                         if break_flag:
@@ -167,7 +173,9 @@ class StudentAI():
                     break
 
         else:
-            for i in range(self.col):
+            for a in range(self.col):
+                i = (self.col + (~a, a)[a % 2]) // 2
+
                 j = self.myBoard.get_row_with_g(i)
                 if j == -1:
                     continue
