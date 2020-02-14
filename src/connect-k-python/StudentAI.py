@@ -9,7 +9,7 @@ from Heuristic import *
 
 MIN_VALUE: int = -99999999
 MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 2
+TARGET_DEPTH: int = 3
 PLAYER1: int = 1
 PLAYER2: int = 2
 CLEAR: int = 0
@@ -77,6 +77,8 @@ class StudentAI():
         else:
             move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
 
+        self.myBoard.move(move[0], move[1], self.player1)
+        
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
             return Move(move[0], move[1])
@@ -122,14 +124,14 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
-            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN)
+            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN, move)
             if h_star > h:
                 move[0] = col
                 move[1] = row
                 h = h_star
 
         else:
-            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN)
+            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN, move)
             if h_star < h:
                 move[0] = col
                 move[1] = row
