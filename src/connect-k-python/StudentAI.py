@@ -20,9 +20,9 @@ AB_MODE: int = 1
 MODE: int = 1
 RANDOM: bool = False
 
-depth = {(0, 5): 5, (0, 7): 3, (1, 5): 8, (1, 7): 6}
+depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
 
-WEIGHTS: List[float] = [1.5, -1, 0.1, -0.1, 0, 0]
+WEIGHTS: List[float] = [1, -0.5, 0.1, -1, 0, 0]
 
 
 def heuristic_random():
