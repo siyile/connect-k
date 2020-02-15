@@ -9,7 +9,7 @@ from Heuristic import *
 
 MIN_VALUE: int = -99999999
 MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 10
+TARGET_DEPTH: int = 3
 PLAYER1: int = 1
 PLAYER2: int = 2
 CLEAR: int = 0
@@ -17,7 +17,7 @@ MIN_TURN: int = 0
 MAX_TURN: int = 1
 PURE_MODE: int = 0
 AB_MODE: int = 1
-MODE: int = 1
+MODE: int = PURE_MODE
 RANDOM: bool = False
 
 WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
@@ -74,9 +74,9 @@ class StudentAI():
         move = [-1, -1]
 
         if MODE == PURE_MODE:
-            move, _ = self.pure_minimax(0, MAX_TURN, move)
+            move, _ = self.pure_minimax(0, MAX_TURN)
         else:
-            move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
+            move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
         self.myBoard.move(move[0], move[1], self.player1)
 
@@ -87,18 +87,18 @@ class StudentAI():
         else:
             return Move(move[0], 0)
 
-    def pure_minimax(self, cur_depth, turn, move):
+    def pure_minimax(self, cur_depth, turn):
         """
         :return: move, h
         """
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            if cur_depth == TARGET_DEPTH:
-                return self.cal_heru()
+            return self.cal_heru()
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
 
         player = self.player1 if turn == MAX_TURN else self.player2
+        move = [-1, -1]
 
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
@@ -129,14 +129,14 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
-            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN, move)
+            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN)
             if h_star > h:
                 move[0] = col
                 move[1] = row
                 h = h_star
 
         else:
-            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN, move)
+            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN)
             if h_star < h:
                 move[0] = col
                 move[1] = row
@@ -147,7 +147,7 @@ class StudentAI():
 
         return move, h
 
-    def ab_minimax(self, cur_depth, turn, alpha, beta, move):
+    def ab_minimax(self, cur_depth, turn, alpha, beta):
         """
         :return: move, h
         """
@@ -157,6 +157,7 @@ class StudentAI():
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
+        move = [-1, -1]
 
         break_flag: bool = False
 
@@ -193,7 +194,7 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
-            _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta)
 
             if h_star > h:
                 h = h_star
@@ -203,7 +204,7 @@ class StudentAI():
             alpha = max(alpha, h_star)
         # MIN_TURN
         else:
-            _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta)
 
             if h_star < h:
                 h = h_star
