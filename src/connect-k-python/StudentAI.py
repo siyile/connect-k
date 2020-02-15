@@ -7,18 +7,18 @@ from Heuristic import *
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
 
-MIN_VALUE: int = -99999999
-MAX_VALUE: int = 99999999
-TARGET_DEPTH: int = 10
-PLAYER1: int = 1
-PLAYER2: int = 2
-CLEAR: int = 0
-MIN_TURN: int = 0
-MAX_TURN: int = 1
-PURE_MODE: int = 0
-AB_MODE: int = 1
-MODE: int = 1
-RANDOM: bool = False
+MIN_VALUE = -99999999
+MAX_VALUE = 99999999
+TARGET_DEPTH = 10
+PLAYER1 = 1
+PLAYER2 = 2
+CLEAR = 0
+MIN_TURN = 0
+MAX_TURN = 1
+PURE_MODE = 0
+AB_MODE = 1
+MODE = 1
+RANDOM = False
 
 depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
 
@@ -165,7 +165,7 @@ class StudentAI():
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
 
-        break_flag: bool = False
+        break_flag = False
 
         if self.g == 0:
             for a in range(self.col):
@@ -196,7 +196,7 @@ class StudentAI():
         return move, h
 
     def ab_update_move_h(self, col, row, move, h, alpha, beta, turn, cur_depth, player):
-        break_flag: bool = False
+        break_flag = False
 
         # make move
         self.myBoard.move(col, row, player)
