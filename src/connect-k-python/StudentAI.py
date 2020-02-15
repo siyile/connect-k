@@ -20,7 +20,9 @@ AB_MODE: int = 1
 MODE: int = PURE_MODE
 RANDOM: bool = False
 
-WEIGHTS: List[float] = [1, -1, 0, 0, 0, 0]
+depth = {(0, 5): 5, (0, 7): 3, (1, 5): 8, (1, 7): 6}
+
+WEIGHTS: List[float] = [1.5, -1, 0.1, -0.1, 0, 0]
 
 
 def heuristic_random():
@@ -44,6 +46,11 @@ class StudentAI():
         self.board = Board(col, row, k, g)
         self.myBoard = MyBoard(col, row, k, g)
         self.heuristic = Heuristic(WEIGHTS)
+        global TARGET_DEPTH
+        try:
+            TARGET_DEPTH = depth[(g, col)]
+        except:
+            TARGET_DEPTH = 5 if g else 3
 
     def get_move(self, move):
         if self.player1 == -1:
@@ -167,7 +174,8 @@ class StudentAI():
                 for b in range(self.row):
                     j = (self.row + (~b, b)[b % 2]) // 2
                     if self.myBoard.is_valid_move(i, j, True):
-                        break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth, player)
+                        break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn,
+                                                                                 cur_depth, player)
                         if break_flag:
                             break
                 if break_flag:
@@ -181,7 +189,8 @@ class StudentAI():
                 if j == -1:
                     continue
 
-                break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth, player)
+                break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth,
+                                                                         player)
                 if break_flag:
                     break
 
