@@ -22,7 +22,7 @@ RANDOM = False
 
 depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
 
-WEIGHTS: [1, -0.5, 0.1, -1, 0, 0]
+WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
 
 
 def heuristic_random():
