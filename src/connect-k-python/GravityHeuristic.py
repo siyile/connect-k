@@ -87,14 +87,15 @@ class GravityHeuristic:
         self.eval_bottom_right_diagonals(False)
         self.eval_top_right_diagonals(False)
 
-        player_threat_cnt = Threat()
-        opponent_threat_cnt = Threat()
-
         # calculate threats count
-        player_threat_cnt = self.calculate_threats(self.player_threat, self.opponent_threat)
-        opponent_threat_cnt = self.calculate_threats(self.opponent_threat_cnt, self.player_threat_cnt)
+        player_threat_cnt = GravityHeuristic.calculate_threats(self.player_threat, self.opponent_threat)
+        opponent_threat_cnt = GravityHeuristic.calculate_threats(self.opponent_threat, self.player_threat)
 
-        return self.get_heuristic()
+        score = 0
+        score += self.calculate_score(player_threat_cnt, opponent_threat_cnt)
+        score -= self.calculate_score(opponent_threat_cnt, player_threat_cnt)
+
+        return self.get_heuristic(score)
 
     def eval_horizontal_lines(self, is_player: bool):
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
@@ -226,7 +227,7 @@ class GravityHeuristic:
                 self.opponent_lines[cnt] += 1
 
     @staticmethod
-    def calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
+    def calculate_threats(player_threats: Set[Slot], opponent_threats: Set[Slot]):
         player_threats_cnt = Threat()
 
         unshared_odd = set()
@@ -294,9 +295,9 @@ class GravityHeuristic:
                     (ocnt.shared_even % 2 == 1) or ((ocnt.shared_even + ocnt.unshared_even) == 1 and (pcnt.shared_odd + pcnt.unshared_odd) == 1):
                 opponent_score += 100
 
-        return player_score, opponent_score
+        return player_score - opponent_score
 
-    def get_heuristic(self):
+    def get_heuristic(self, h):
         if self.player_lines[self.k] > 0:
             return MAX_VALUE
         if self.opponent_lines[self.k] > 0:
