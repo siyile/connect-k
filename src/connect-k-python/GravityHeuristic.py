@@ -193,7 +193,7 @@ class GravityHeuristic:
     def init_player_and_empty_slot(self, is_player: bool):
         player = self.player if is_player else self.opponent
         opponent = self.opponent if is_player else self.player
-        empty = Slot(0, 0)
+        empty = Slot(6, 0)
         return player, opponent, empty
 
     def add_threat(self, is_player: bool, empty, cnt, is_vertical: bool = False):
@@ -241,14 +241,14 @@ class GravityHeuristic:
                 if (player_threat.row + 1) % 2 == 1 and player_threat not in shared_odd:
                     player_threats_cnt.shared_odd += 1
                     shared_odd.add(player_threat)
-                elif player_threat.col % 2 == 0 and player_threat not in shared_even:
+                elif (player_threat.col + 1) % 2 + 1 == 0 and player_threat not in shared_even:
                     player_threats_cnt.shared_even += 1
                     shared_even.add(player_threat)
             else:
                 if (player_threat.row + 1) % 2 == 1 and player_threat not in unshared_odd:
                     player_threats_cnt.unshared_odd += 1
                     unshared_odd.add(player_threat)
-                elif player_threat.row % 2 == 0 and player_threat not in unshared_even:
+                elif (player_threat.row + 1) % 2 == 0 and player_threat not in unshared_even:
                     player_threats_cnt.unshared_even += 1
                     unshared_even.add(player_threat)
 
