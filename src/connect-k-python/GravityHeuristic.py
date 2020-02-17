@@ -133,7 +133,6 @@ class GravityHeuristic:
                         cnt += 1
                     elif self.board.get_slot(j, cur_row) == opponent:
                         stop_flag = True
-                        i = cur_row
                     else:
                         empty = Slot(cur_row, j)
 
@@ -193,7 +192,7 @@ class GravityHeuristic:
     def init_player_and_empty_slot(self, is_player: bool):
         player = self.player if is_player else self.opponent
         opponent = self.opponent if is_player else self.player
-        empty = Slot(6, 0)
+        empty = Slot(self.row, 0)
         return player, opponent, empty
 
     def add_threat(self, is_player: bool, empty, cnt, is_vertical: bool = False):
