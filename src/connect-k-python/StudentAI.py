@@ -10,7 +10,6 @@ from GravityHeuristic import *
 
 MIN_VALUE = -99999999
 MAX_VALUE = 99999999
-TARGET_DEPTH = 10
 PLAYER1 = 1
 PLAYER2 = 2
 CLEAR = 0
@@ -40,6 +39,8 @@ class StudentAI():
     # player1 is me, player 2 is opponent
     player1 = -1
     player2 = -1
+    
+    limit = 10
 
     def __init__(self, col, row, k, g):
         self.g = g
@@ -50,11 +51,10 @@ class StudentAI():
         self.myBoard = MyBoard(col, row, k, g)
         self.heuristic = Heuristic(WEIGHTS)
         self.heuristic_g = GravityHeuristic(WEIGHTS)
-        global TARGET_DEPTH
         try:
-            TARGET_DEPTH = depth[(g, col)]
+            self.limit = depth[(g, col)]
         except:
-            TARGET_DEPTH = 5 if g else 3
+            self.limit = 5 if g else 3
 
     def get_move(self, move):
         if self.player1 == -1:
@@ -85,9 +85,12 @@ class StudentAI():
         move = [-1, -1]
 
         if MODE == PURE_MODE:
-            move, _ = self.pure_minimax(0, MAX_TURN, move)
+            move, _ = self.pure_minimax(self.limit, MAX_TURN, move)
         else:
-            move, _ = self.ab_minimax(0, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
+            move, h = self.ab_minimax(self.limit, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
+
+            if h == LOSE_CODE:
+                move, h = self.ab_minimax(2, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
 
         self.myBoard.move(move[0], move[1], self.player1)
 
@@ -140,14 +143,14 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
-            _, h_star = self.pure_minimax(cur_depth + 1, MIN_TURN, move)
+            _, h_star = self.pure_minimax(cur_depth - 1, MIN_TURN, move)
             if h_star > h:
                 move[0] = col
                 move[1] = row
                 h = h_star
 
         else:
-            _, h_star = self.pure_minimax(cur_depth + 1, MAX_TURN, move)
+            _, h_star = self.pure_minimax(cur_depth - 1, MAX_TURN, move)
             if h_star < h:
                 move[0] = col
                 move[1] = row
@@ -163,7 +166,7 @@ class StudentAI():
         :return: move, h
         """
         # check if is target
-        if cur_depth == TARGET_DEPTH:
+        if cur_depth == 0:
             h = self.cal_heru()
             return h
 
@@ -200,39 +203,38 @@ class StudentAI():
                 self.myBoard.move(col, row, player)
 
                 if turn == MAX_TURN:
-                    if self.myBoard.is_win() == self.player1:
+                    winner = self.myBoard.is_win()
+                    if winner == self.player1:
                         move[0] = col
                         move[1] = row
                         self.myBoard.clear_move(col, row)
 
                         return move, WIN_CODE
+                    elif winner == self.player2:
+                        h = max(LOSE_CODE, h)
+                    else:
+                        _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta, move)
+                        if h_star > h:
+                            h = h_star
+                            move[0] = col
+                            move[1] = row
 
-                    _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
-
-                    if h_star > h:
-                        h = h_star
-                        move[0] = col
-                        move[1] = row
-
-                    alpha = max(alpha, h_star)
+                    alpha = max(alpha, h)
 
                 # MIN_TURN
                 else:
-                    if self.myBoard.is_win() == self.player2:
-                        move[0] = col
-                        move[1] = row
+                    winner = self.myBoard.is_win()
+                    if winner == self.player2:
                         self.myBoard.clear_move(col, row)
+                        return [], LOSE_CODE
+                    elif winner == self.player1:
+                        h = min(h, WIN_CODE)
+                    else:
+                        _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta, move)
 
-                        return move, LOSE_CODE
+                        h = min(h_star, h)
 
-                    _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
-
-                    if h_star < h:
-                        h = h_star
-                        move[0] = col
-                        move[1] = row
-
-                    beta = min(beta, h_star)
+                    beta = min(beta, h)
 
                 # clear move
                 self.myBoard.clear_move(col, row)
@@ -256,7 +258,7 @@ class StudentAI():
 
                 return True, move, WIN_CODE, alpha, beta
 
-            _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta, move)
 
             if h_star == WIN_CODE:
                 move[0] = col
@@ -281,7 +283,7 @@ class StudentAI():
 
                 return True, move, LOSE_CODE, alpha, beta
 
-            _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta, move)
 
             if h_star == LOSE_CODE:
                 move[0] = col
