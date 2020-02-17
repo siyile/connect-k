@@ -2,8 +2,8 @@ from MyBoard import MyBoard
 from typing import *
 
 
-WIN_CODE = 3000
-LOSE_CODE = -3000
+WIN_CODE = 300000
+LOSE_CODE = -300000
 
 
 class Slot:

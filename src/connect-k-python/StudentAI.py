@@ -20,8 +20,8 @@ PURE_MODE = 0
 AB_MODE = 1
 MODE = 1
 RANDOM = False
-WIN_CODE = 3000
-LOSE_CODE = -3000
+WIN_CODE = 300000
+LOSE_CODE = -300000
 
 depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
 
