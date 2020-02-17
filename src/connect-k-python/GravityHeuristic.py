@@ -143,7 +143,7 @@ class GravityHeuristic:
                     cur_row += 1
 
                 if not stop_flag:
-                    self.add_threat(is_player, empty, cnt, True)
+                    self.add_threat(is_player, empty, cnt)
 
                 i += 1
 
