@@ -3,6 +3,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 from MyBoard import MyBoard
 from Heuristic import *
+from GravityHeuristic import *
 
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
@@ -46,6 +47,7 @@ class StudentAI():
         self.board = Board(col, row, k, g)
         self.myBoard = MyBoard(col, row, k, g)
         self.heuristic = Heuristic(WEIGHTS)
+        self.heuristic_g = GravityHeuristic(WEIGHTS)
         global TARGET_DEPTH
         try:
             TARGET_DEPTH = depth[(g, col)]
@@ -233,4 +235,7 @@ class StudentAI():
         if RANDOM:
             return [], heuristic_random()
         else:
-            return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            if self.g == 1:
+                return [], self.heuristic_g.eval_board(self.player1, self.player2, self.myBoard)
+            else:
+                return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)

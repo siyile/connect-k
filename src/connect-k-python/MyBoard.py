@@ -27,3 +27,6 @@ class MyBoard(Board):
 
     def clear_move(self, col, row):
         self.board[row][col] = 0
+
+    def get_slot(self, c, r):
+        return self.board[r][c]
