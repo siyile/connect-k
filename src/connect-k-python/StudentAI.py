@@ -104,8 +104,8 @@ class StudentAI():
         """
         # base case : targetDepth reached
         if cur_depth == TARGET_DEPTH:
-            if cur_depth == TARGET_DEPTH:
-                return self.cal_heru()
+            h = self.cal_heru()
+            return h
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
 
@@ -121,7 +121,7 @@ class StudentAI():
                     if self.myBoard.is_valid_move(i, j, True):
                         move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
 
-        # no gravity
+        # with gravity
         else:
             for a in range(self.col):
                 i = (self.col + (~a, a)[a % 2]) // 2
@@ -164,7 +164,8 @@ class StudentAI():
         """
         # check if is target
         if cur_depth == TARGET_DEPTH:
-            return self.cal_heru()
+            h = self.cal_heru()
+            return h
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
