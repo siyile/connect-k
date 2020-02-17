@@ -308,6 +308,7 @@ class GravityHeuristic:
         for i in range(2, self.k, 1):
             h += multiplier * self.player_lines[i]
             h -= multiplier * self.opponent_lines[i]
+            multiplier += 1
 
         return h
 
