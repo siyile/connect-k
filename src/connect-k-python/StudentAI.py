@@ -222,12 +222,13 @@ class StudentAI():
 
                 return True, move, WIN_CODE, alpha, beta
 
-            if h_star > h:
-                h = h_star
-                move[0] = col
-                move[1] = row
+            elif h_star != LOSE_CODE:
+                if h_star > h:
+                    h = h_star
+                    move[0] = col
+                    move[1] = row
 
-            alpha = max(alpha, h_star)
+                alpha = max(alpha, h_star)
         # MIN_TURN
         else:
             if self.myBoard.is_win():
@@ -246,12 +247,13 @@ class StudentAI():
 
                 return True, move, LOSE_CODE, alpha, beta
 
-            if h_star < h:
-                h = h_star
-                move[0] = col
-                move[1] = row
+            elif h_star != WIN_CODE:
+                if h_star < h:
+                    h = h_star
+                    move[0] = col
+                    move[1] = row
 
-            beta = min(beta, h_star)
+                beta = min(beta, h_star)
 
         if beta <= alpha:
             break_flag = True
