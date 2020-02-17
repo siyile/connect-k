@@ -166,12 +166,13 @@ class Heuristic:
             chances[player.opposite.value] += 1
             if count[player.opposite.value] == board.k - 1:
                 threats[player.opposite.value] += 1
+                if not board.g:
+                    threats[player.opposite.value] = MAX_VALUE
 
 
 if __name__ == "__main__":
-    b = Board(5, 5, 3, 0)
-    b.board[0][0] = 1
-    b.board[1][0] = 1
+    b = Board(5, 5, 4, 0)
+    b.board[2][2] = 2
     b.show_board(None)
     h = Heuristic([1, -1, 0.1, -0.1, 0, 0])
     print(h.eval_board(Player(1), b))
