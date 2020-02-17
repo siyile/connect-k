@@ -207,7 +207,7 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
-            if self.myBoard.is_win():
+            if self.myBoard.is_win() == self.player1:
                 move[0] = col
                 move[1] = row
                 self.myBoard.clear_move(col, row)
@@ -232,7 +232,7 @@ class StudentAI():
                 alpha = max(alpha, h_star)
         # MIN_TURN
         else:
-            if self.myBoard.is_win():
+            if self.myBoard.is_win() == self.player2:
                 move[0] = col
                 move[1] = row
                 self.myBoard.clear_move(col, row)
