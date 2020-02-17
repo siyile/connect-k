@@ -216,7 +216,7 @@ class GravityHeuristic:
         if X = 0 now we have threat at X
         """
         if not is_vertical and cnt == self.k - 1 and empty.row - 1 >= 0 and \
-                self.board.get_slot(empty.col, empty.row - 1):
+                self.board.get_slot(empty.col, empty.row - 1) == 0:
             if is_player and empty not in self.player_threat:
                 self.player_threat.add(empty)
             elif not is_player and empty not in self.opponent_threat:
