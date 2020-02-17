@@ -92,8 +92,10 @@ class GravityHeuristic:
         opponent_threat_cnt = GravityHeuristic.calculate_threats(self.opponent_threat, self.player_threat)
 
         score = 0
-        score += self.calculate_score(player_threat_cnt, opponent_threat_cnt)
-        score -= self.calculate_score(opponent_threat_cnt, player_threat_cnt)
+        if self.player == 1:
+            score += self.calculate_score(player_threat_cnt, opponent_threat_cnt)
+        else:
+            score -= self.calculate_score(opponent_threat_cnt, player_threat_cnt)
 
         return self.get_heuristic(score)
 
