@@ -193,9 +193,48 @@ class StudentAI():
                 if j == -1:
                     continue
 
-                break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn, cur_depth,
-                                                                         player)
-                if break_flag:
+                # make move
+                self.myBoard.move(col, row, player)
+
+                if turn == MAX_TURN:
+                    if self.myBoard.is_win() == self.player1:
+                        move[0] = col
+                        move[1] = row
+                        self.myBoard.clear_move(col, row)
+
+                        return move, WIN_CODE
+
+                    _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
+
+                    if h_star > h:
+                        h = h_star
+                        move[0] = col
+                        move[1] = row
+
+                    alpha = max(alpha, h_star)
+
+                # MIN_TURN
+                else:
+                    if self.myBoard.is_win() == self.player2:
+                        move[0] = col
+                        move[1] = row
+                        self.myBoard.clear_move(col, row)
+
+                        return move, LOSE_CODE
+
+                    _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
+
+                    if h_star < h:
+                        h = h_star
+                        move[0] = col
+                        move[1] = row
+
+                    beta = min(beta, h_star)
+
+                # clear move
+                self.myBoard.clear_move(col, row)
+
+                if beta <= alpha:
                     break
 
         return move, h
