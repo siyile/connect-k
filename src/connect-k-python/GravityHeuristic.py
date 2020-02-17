@@ -128,12 +128,12 @@ class GravityHeuristic:
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
         for j in range(self.col):
-            i = 0
-            while i <= self.row - self.k:
+            i = self.k - 1
+            while i - (self.k - 1) >= 0:
                 cnt = 0
                 stop_flag = False
                 cur_row = i
-                while cur_row < i + self.k and not stop_flag:
+                while cur_row > i - self.k and not stop_flag:
                     if self.board.get_slot(j, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(j, cur_row) == opponent:
@@ -142,18 +142,18 @@ class GravityHeuristic:
                     else:
                         empty = Slot(cur_row, j)
 
-                    cur_row += 1
+                    cur_row -= 1
 
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
 
-                i += 1
+                i -= 1
 
     def eval_top_right_diagonals(self, is_player: bool):
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
         for i in range(0, 1, self.row - self.k + 1):
-            for j in range (0, 1, self.col - self.k + 1):
+            for j in range(0, 1, self.col - self.k + 1):
                 cnt = 0
                 stop_flag = False
                 cur_row = i
@@ -215,8 +215,8 @@ class GravityHeuristic:
         0 2 2
         if X = 0 now we have threat at X
         """
-        if not is_vertical and cnt == self.k - 1 and empty.row - 1 >= 0 and \
-                self.board.get_slot(empty.col, empty.row - 1) == 0:
+        if not is_vertical and cnt == self.k - 1 and empty.row + 1 <= self.row - 1 and \
+                self.board.get_slot(empty.col, empty.row + 1) == 0:
             if is_player and empty not in self.player_threat:
                 self.player_threat.add(empty)
             elif not is_player and empty not in self.opponent_threat:
