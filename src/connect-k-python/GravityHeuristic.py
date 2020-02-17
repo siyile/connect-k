@@ -82,9 +82,9 @@ class GravityHeuristic:
         self.eval_vertical_lines(False)
 
         # eval diagonals
-        self.eval_bottom_right_diagonals(True)
+        self.eval_left_top_diagonals(True)
         self.eval_top_right_diagonals(True)
-        self.eval_bottom_right_diagonals(False)
+        self.eval_left_top_diagonals(False)
         self.eval_top_right_diagonals(False)
 
         # calculate threats count
@@ -103,8 +103,7 @@ class GravityHeuristic:
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
         for i in range(self.row):
-            j = 0
-            while j <= self.col - self.k:
+            for j in range(0, self.col - self.k + 1, 1):
                 cnt = 0
                 stop_flag = False
                 cur_col = j
@@ -113,7 +112,6 @@ class GravityHeuristic:
                         cnt += 1
                     elif self.board.get_slot(cur_col, i) == opponent:
                         stop_flag = True
-                        j = cur_col
                     else:
                         empty = Slot(i, cur_col)
 
@@ -122,14 +120,11 @@ class GravityHeuristic:
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
 
-                j += 1
-
     def eval_vertical_lines(self, is_player: bool):
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
         for j in range(self.col):
-            i = self.k - 1
-            while i - (self.k - 1) >= 0:
+            for i in range(self.row - 1, -1, self.k - 2):
                 cnt = 0
                 stop_flag = False
                 cur_row = i
@@ -147,19 +142,17 @@ class GravityHeuristic:
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
 
-                i -= 1
-
     def eval_top_right_diagonals(self, is_player: bool):
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
-        for i in range(0, 1, self.row - self.k + 1):
+        for i in range(self.row - 1, -1, self.k - 2):
             for j in range(0, 1, self.col - self.k + 1):
                 cnt = 0
                 stop_flag = False
                 cur_row = i
                 cur_col = j
 
-                while cur_row < i + self.k and cur_col < j + self.k and not stop_flag:
+                while cur_row > i - self.k and cur_col < j + self.k and not stop_flag:
                     if self.board.get_slot(cur_col, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(cur_col, cur_row) == opponent:
@@ -168,22 +161,22 @@ class GravityHeuristic:
                         empty = Slot(cur_row, cur_col)
 
                     cur_col += 1
-                    cur_row += 1
+                    cur_row -= 1
 
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
 
-    def eval_bottom_right_diagonals(self, is_player: bool):
+    def eval_left_top_diagonals(self, is_player: bool):
         player, opponent, empty = self.init_player_and_empty_slot(is_player)
 
-        for i in range(0, 1, self.row - self.k + 1):
-            for j in range(self.k - 1, 1, self.col):
+        for i in range(self.row - 1, -1, self.k - 2):
+            for j in range(self.col - 1, -1, self.k - 2):
                 cnt = 0
                 stop_flag = False
                 cur_row = i
                 cur_col = j
 
-                while cur_row < i + self.k and cur_col >= j - self.k + 1 and not stop_flag:
+                while cur_row > i - self.k and cur_col > j - self.k and not stop_flag:
                     if self.board.get_slot(cur_col, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(cur_col, cur_row) == opponent:
@@ -192,7 +185,7 @@ class GravityHeuristic:
                         empty = Slot(cur_row, cur_col)
 
                     cur_col -= 1
-                    cur_row += 1
+                    cur_row -= 1
 
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
@@ -240,7 +233,7 @@ class GravityHeuristic:
         for player_threat in player_threats:
             shared = False
             for opponent_threat in opponent_threats:
-                if player_threat.col == opponent_threat.col and player_threat.row >= opponent_threat.row:
+                if player_threat.col == opponent_threat.col and player_threat.row <= opponent_threat.row:
                     shared = True
                     break
 
