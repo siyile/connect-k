@@ -20,6 +20,8 @@ PURE_MODE = 0
 AB_MODE = 1
 MODE = 1
 RANDOM = False
+WIN_CODE = 3000
+LOSE_CODE = -3000
 
 depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
 
@@ -204,7 +206,21 @@ class StudentAI():
         self.myBoard.move(col, row, player)
 
         if turn == MAX_TURN:
+            if self.myBoard.is_win():
+                move[0] = col
+                move[1] = row
+                self.myBoard.clear_move(col, row)
+
+                return True, move, WIN_CODE, alpha, beta
+
             _, h_star = self.ab_minimax(cur_depth + 1, MIN_TURN, alpha, beta, move)
+
+            if h_star == WIN_CODE:
+                move[0] = col
+                move[1] = row
+                self.myBoard.clear_move(col, row)
+
+                return True, move, WIN_CODE, alpha, beta
 
             if h_star > h:
                 h = h_star
@@ -214,7 +230,21 @@ class StudentAI():
             alpha = max(alpha, h_star)
         # MIN_TURN
         else:
+            if self.myBoard.is_win():
+                move[0] = col
+                move[1] = row
+                self.myBoard.clear_move(col, row)
+
+                return True, move, LOSE_CODE, alpha, beta
+
             _, h_star = self.ab_minimax(cur_depth + 1, MAX_TURN, alpha, beta, move)
+
+            if h_star == LOSE_CODE:
+                move[0] = col
+                move[1] = row
+                self.myBoard.clear_move(col, row)
+
+                return True, move, LOSE_CODE, alpha, beta
 
             if h_star < h:
                 h = h_star

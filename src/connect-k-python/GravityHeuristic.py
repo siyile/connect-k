@@ -2,8 +2,8 @@ from MyBoard import MyBoard
 from typing import *
 
 
-MIN_VALUE = -9999999
-MAX_VALUE = 999999
+WIN_CODE = 3000
+LOSE_CODE = -3000
 
 
 class Slot:
@@ -293,9 +293,9 @@ class GravityHeuristic:
 
     def get_heuristic(self, h):
         if self.opponent_lines[self.k] > 0:
-            return MIN_VALUE
+            return LOSE_CODE
         if self.player_lines[self.k] > 0:
-            return MAX_VALUE
+            return WIN_CODE
 
         multiplier = 1
         for i in range(2, self.k, 1):
