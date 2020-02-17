@@ -2,8 +2,8 @@ from MyBoard import MyBoard
 from typing import *
 
 
-MIN_VALUE = -99999999
-MAX_VALUE = 99999999
+MIN_VALUE = -999999
+MAX_VALUE = 999999
 
 
 class Slot:
