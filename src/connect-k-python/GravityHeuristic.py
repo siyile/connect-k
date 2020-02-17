@@ -300,13 +300,12 @@ class GravityHeuristic:
         return player_score - opponent_score
 
     def get_heuristic(self, h):
-        if self.player_lines[self.k] > 0:
-            return MAX_VALUE
         if self.opponent_lines[self.k] > 0:
             return MIN_VALUE
+        if self.player_lines[self.k] > 0:
+            return MAX_VALUE
 
         multiplier = 1
-        h = 0
         for i in range(2, self.k, 1):
             h += multiplier * self.player_lines[i]
             h -= multiplier * self.opponent_lines[i]
