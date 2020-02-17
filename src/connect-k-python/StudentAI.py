@@ -193,6 +193,9 @@ class StudentAI():
                 if j == -1:
                     continue
 
+                col = i
+                row = j
+
                 # make move
                 self.myBoard.move(col, row, player)
 
