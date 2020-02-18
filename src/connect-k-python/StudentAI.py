@@ -8,21 +8,19 @@ from GravityHeuristic import *
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
 
-MIN_VALUE = -99999999
-MAX_VALUE = 99999999
 PLAYER1 = 1
 PLAYER2 = 2
 CLEAR = 0
 MIN_TURN = 0
 MAX_TURN = 1
-PURE_MODE = 0
-AB_MODE = 1
-MODE = 1
 RANDOM = False
-WIN_CODE = 300000
-LOSE_CODE = -300000
+WIN_CODE = 2000
+LOSE_CODE = -WIN_CODE
+MAX_VALUE = 100000
+MIN_VALUE = -MAX_VALUE
 
-depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 6}
+
+depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 8, (1, 6): 7, (1, 8): 5}
 
 WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
 
@@ -82,15 +80,10 @@ class StudentAI():
                 r = self.myBoard.get_row_with_g(move.col)
                 self.myBoard.move(move.col, r, self.player2)
 
-        move = [-1, -1]
+        move, h = self.ab_minimax(self.limit, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
-        if MODE == PURE_MODE:
-            move, _ = self.pure_minimax(self.limit, MAX_TURN, move)
-        else:
-            move, h = self.ab_minimax(self.limit, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
-
-            if h == LOSE_CODE:
-                move, h = self.ab_minimax(2, MAX_TURN, MIN_VALUE, MAX_VALUE, move)
+        if h == LOSE_CODE:
+            move, h = self.ab_minimax(4, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
         self.myBoard.move(move[0], move[1], self.player1)
 
@@ -101,67 +94,7 @@ class StudentAI():
         else:
             return Move(move[0], 0)
 
-    def pure_minimax(self, cur_depth, turn, move):
-        """
-        :return: move, h
-        """
-        # base case : targetDepth reached
-        if cur_depth == TARGET_DEPTH:
-            h = self.cal_heru()
-            return h
-
-        h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
-
-        player = self.player1 if turn == MAX_TURN else self.player2
-
-        # g = 1 has gravity, 0 no gravity
-        if self.g == 0:
-            for a in range(self.col):
-                i = (self.col + (~a, a)[a % 2]) // 2
-                for b in range(self.row):
-                    j = (self.row + (~b, b)[b % 2]) // 2
-                    # update move only when valid
-                    if self.myBoard.is_valid_move(i, j, True):
-                        move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
-
-        # with gravity
-        else:
-            for a in range(self.col):
-                i = (self.col + (~a, a)[a % 2]) // 2
-
-                j = self.myBoard.get_row_with_g(i)
-
-                if j == -1:
-                    continue
-
-                move, h = self.pure_update_move_h(i, j, move, h, turn, cur_depth, player)
-
-        return move, h
-
-    def pure_update_move_h(self, col, row, move, h, turn, cur_depth, player):
-        # make move
-        self.myBoard.move(col, row, player)
-
-        if turn == MAX_TURN:
-            _, h_star = self.pure_minimax(cur_depth - 1, MIN_TURN, move)
-            if h_star > h:
-                move[0] = col
-                move[1] = row
-                h = h_star
-
-        else:
-            _, h_star = self.pure_minimax(cur_depth - 1, MAX_TURN, move)
-            if h_star < h:
-                move[0] = col
-                move[1] = row
-                h = h_star
-
-        # clear move
-        self.myBoard.clear_move(col, row)
-
-        return move, h
-
-    def ab_minimax(self, cur_depth, turn, alpha, beta, move):
+    def ab_minimax(self, cur_depth, turn, alpha, beta):
         """
         :return: move, h
         """
@@ -174,6 +107,7 @@ class StudentAI():
         player = self.player1 if turn == MAX_TURN else self.player2
 
         break_flag = False
+        move = [-1, -1]
 
         if self.g == 0:
             for a in range(self.col):
@@ -187,7 +121,7 @@ class StudentAI():
                             break
                 if break_flag:
                     break
-
+        # with gravity
         else:
             for a in range(self.col):
                 i = (self.col + (~a, a)[a % 2]) // 2
@@ -204,7 +138,7 @@ class StudentAI():
 
                 if turn == MAX_TURN:
                     winner = self.myBoard.is_win()
-                    if winner == self.player1:
+                    if winner == self.player1 or winner == -1:
                         move[0] = col
                         move[1] = row
                         self.myBoard.clear_move(col, row)
@@ -213,7 +147,7 @@ class StudentAI():
                     elif winner == self.player2:
                         h = max(LOSE_CODE, h)
                     else:
-                        _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta, move)
+                        _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
                         if h_star > h:
                             h = h_star
                             move[0] = col
@@ -230,7 +164,7 @@ class StudentAI():
                     elif winner == self.player1:
                         h = min(h, WIN_CODE)
                     else:
-                        _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta, move)
+                        _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta)
 
                         h = min(h_star, h)
 
@@ -258,7 +192,7 @@ class StudentAI():
 
                 return True, move, WIN_CODE, alpha, beta
 
-            _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
 
             if h_star == WIN_CODE:
                 move[0] = col
@@ -283,7 +217,7 @@ class StudentAI():
 
                 return True, move, LOSE_CODE, alpha, beta
 
-            _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta, move)
+            _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta)
 
             if h_star == LOSE_CODE:
                 move[0] = col

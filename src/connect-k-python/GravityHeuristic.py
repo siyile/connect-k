@@ -88,8 +88,8 @@ class GravityHeuristic:
         self.eval_top_right_diagonals(False)
 
         # calculate threats count
-        player_threat_cnt = GravityHeuristic.calculate_threats(self.player_threat, self.opponent_threat)
-        opponent_threat_cnt = GravityHeuristic.calculate_threats(self.opponent_threat, self.player_threat)
+        player_threat_cnt = self.calculate_threats(self.player_threat, self.opponent_threat)
+        opponent_threat_cnt = self.calculate_threats(self.opponent_threat, self.player_threat)
 
         score = 0
         if self.player == 1:
@@ -128,7 +128,7 @@ class GravityHeuristic:
                 cnt = 0
                 stop_flag = False
                 cur_row = i
-                while cur_row > i - self.k and not stop_flag:
+                while i - cur_row + 1 <= self.k and not stop_flag:
                     if self.board.get_slot(j, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(j, cur_row) == opponent:
@@ -155,12 +155,12 @@ class GravityHeuristic:
                     if self.board.get_slot(cur_col, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(cur_col, cur_row) == opponent:
-                        stop_flag = False
+                        stop_flag = True
                     else:
                         empty = Slot(cur_row, cur_col)
 
-                    cur_col += 1
                     cur_row -= 1
+                    cur_col += 1
 
                 if not stop_flag:
                     self.add_threat(is_player, empty, cnt)
@@ -179,7 +179,7 @@ class GravityHeuristic:
                     if self.board.get_slot(cur_col, cur_row) == player:
                         cnt += 1
                     elif self.board.get_slot(cur_col, cur_row) == opponent:
-                        stop_flag = False
+                        stop_flag = True
                     else:
                         empty = Slot(cur_row, cur_col)
 
@@ -192,7 +192,7 @@ class GravityHeuristic:
     def init_player_and_empty_slot(self, is_player: bool):
         player = self.player if is_player else self.opponent
         opponent = self.opponent if is_player else self.player
-        empty = Slot(self.row, 0)
+        empty = Slot(self.row - 1, 0)
         return player, opponent, empty
 
     def add_threat(self, is_player: bool, empty, cnt, is_vertical: bool = False):
@@ -207,7 +207,7 @@ class GravityHeuristic:
         0 2 2
         if X = 0 now we have threat at X
         """
-        if not is_vertical and cnt == self.k - 1 and empty.row + 1 <= self.row - 1 and \
+        if cnt == self.k - 1 and empty.row < self.row - 1 and \
                 self.board.get_slot(empty.col, empty.row + 1) == 0:
             if is_player and empty not in self.player_threat:
                 self.player_threat.add(empty)
@@ -220,8 +220,7 @@ class GravityHeuristic:
             else:
                 self.opponent_lines[cnt] += 1
 
-    @staticmethod
-    def calculate_threats(player_threats: Set[Slot], opponent_threats: Set[Slot]):
+    def calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
         player_threats_cnt = Threat()
 
         unshared_odd = set()
@@ -237,19 +236,19 @@ class GravityHeuristic:
                     break
 
             if shared:
-                if (player_threat.row + 1) % 2 == 1 and player_threat not in shared_odd:
+                if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in shared_odd:
                     player_threats_cnt.shared_odd += 1
-                    shared_odd.add(player_threat)
-                elif (player_threat.col + 1) % 2 + 1 == 0 and player_threat not in shared_even:
+                    shared_odd.add(player_threat.col)
+                elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in shared_even:
                     player_threats_cnt.shared_even += 1
-                    shared_even.add(player_threat)
+                    shared_even.add(player_threat.col)
             else:
-                if (player_threat.row + 1) % 2 == 1 and player_threat not in unshared_odd:
+                if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in unshared_odd:
                     player_threats_cnt.unshared_odd += 1
-                    unshared_odd.add(player_threat)
-                elif (player_threat.row + 1) % 2 == 0 and player_threat not in unshared_even:
+                    unshared_odd.add(player_threat.col)
+                elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in unshared_even:
                     player_threats_cnt.unshared_even += 1
-                    unshared_even.add(player_threat)
+                    unshared_even.add(player_threat.col)
 
         return player_threats_cnt
 
@@ -270,7 +269,7 @@ class GravityHeuristic:
                     ((ocnt.unshared_odd + ocnt.shared_odd) % 2 == 0 and (ocnt.unshared_odd + ocnt.shared_odd) > 0) and pcnt.unshared_odd == 0:
                 opponent_score += 100
 
-        elif self.row * self.col % 2 == 0 and self.row % 2 == 1:
+        elif (self.row * self.col) % 2 == 0 and self.row % 2 == 1:
             if (pcnt.unshared_even - 1) == ocnt.unshared_even or \
                     pcnt.shared_even % 2 == 1 or \
                     (pcnt.shared_even + pcnt.unshared_even) == 1 and (ocnt.shared_odd + ocnt.unshared_odd) == 1:
@@ -280,7 +279,7 @@ class GravityHeuristic:
                     (((ocnt.shared_even + ocnt.unshared_even) % 2 == 0 and (ocnt.shared_even + ocnt.unshared_even) > 0) and (((ocnt.unshared_even - 2) == pcnt.unshared_even) or (ocnt.shared_even == pcnt.shared_even))):
                 opponent_score += 100
 
-        elif self.row * self.col % 2 == 1:
+        elif (self.row * self.col) % 2 == 1:
             if ((pcnt.shared_odd + pcnt.unshared_odd) > 0) or \
                     (((pcnt.shared_even + pcnt.unshared_even) % 2 == 0 and (pcnt.shared_even + pcnt.unshared_even) > 0) and ((pcnt.unshared_even - 2 == ocnt.unshared_even) or (pcnt.shared_even == ocnt.shared_even))):
                 player_score += 100
@@ -302,6 +301,12 @@ class GravityHeuristic:
             h += multiplier * self.player_lines[i]
             h -= multiplier * self.opponent_lines[i]
             multiplier += 1
+
+        if h == 0:
+            if self.player == 2:
+                return 1
+            else:
+                return -1
 
         return h
 
