@@ -14,7 +14,7 @@ CLEAR = 0
 MIN_TURN = 0
 MAX_TURN = 1
 RANDOM = False
-WIN_CODE = 2000
+WIN_CODE = 2000000
 LOSE_CODE = -WIN_CODE
 MAX_VALUE = 100000
 MIN_VALUE = -MAX_VALUE
@@ -82,8 +82,8 @@ class StudentAI():
 
         move, h = self.ab_minimax(self.limit, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
-        if h == LOSE_CODE:
-            move, h = self.ab_minimax(4, MAX_TURN, MIN_VALUE, MAX_VALUE)
+        if h == LOSE_CODE or h == MIN_VALUE:
+            move, h = self.ab_minimax(2, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
         self.myBoard.move(move[0], move[1], self.player1)
 
@@ -111,7 +111,7 @@ class StudentAI():
 
         # TODO: remove
         if cur_depth == self.limit:
-            heuristic_list = [[0] * self.col] * self.row
+            heuristic_list = [[0 for x in range(self.col)] for y in range (self.row)]
 
         if self.g == 0:
             for a in range(self.col):
@@ -185,26 +185,35 @@ class StudentAI():
                 # clear move
                 self.myBoard.clear_move(col, row)
 
-                # TODO: remove
-                if self.limit == cur_depth:
-                    self.print_heuristic(heuristic_list)
-
                 if beta <= alpha:
                     break
+
+        # TODO: remove
+        if self.limit == cur_depth:
+            self.print_heuristic(heuristic_list)
 
         return move, h
 
     def print_heuristic(self, h):
         for row in range(self.row):
-            print(str(row).ljust(8), '')
+            print(str(row).ljust(8), end='')
             for col in range(self.col):
-                print(str(h[row][col]).ljust(8), '')
+                if h[row][col] == WIN_CODE:
+                    s = "WIN"
+                elif h[row][col] == LOSE_CODE:
+                    s = "LOSE"
+                else:
+                    s = str(h[row][col])
+                print(s.ljust(8), end='')
             print()
-        print(''.ljust(30, '-'))
+        print(''.ljust(100, '-'))
 
-        print(''.ljust(8))
+        print(''.ljust(8), end='')
         for i in range(self.col):
-            print(str(i).ljust(8))
+            print(str(i).ljust(8), end='')
+
+        print()
+        print()
 
     def ab_update_move_h(self, col, row, move, h, alpha, beta, turn, cur_depth, player):
         break_flag = False
