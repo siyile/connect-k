@@ -109,6 +109,10 @@ class StudentAI():
         break_flag = False
         move = [-1, -1]
 
+        # TODO: remove
+        if cur_depth == self.limit:
+            heuristic_list = [[0] * self.col] * self.row
+
         if self.g == 0:
             for a in range(self.col):
                 i = (self.col + (~a, a)[a % 2]) // 2
@@ -143,11 +147,19 @@ class StudentAI():
                         move[1] = row
                         self.myBoard.clear_move(col, row)
 
+                        # TODO: remove
+                        if cur_depth == self.limit:
+                            heuristic_list[row][col] = WIN_CODE
+
                         return move, WIN_CODE
                     elif winner == self.player2:
                         h = max(LOSE_CODE, h)
                     else:
                         _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
+                        # TODO: remove
+                        if cur_depth == self.limit:
+                            heuristic_list[row][col] = h
+
                         if h_star > h:
                             h = h_star
                             move[0] = col
@@ -173,10 +185,26 @@ class StudentAI():
                 # clear move
                 self.myBoard.clear_move(col, row)
 
+                # TODO: remove
+                if self.limit == cur_depth:
+                    self.print_heuristic(heuristic_list)
+
                 if beta <= alpha:
                     break
 
         return move, h
+
+    def print_heuristic(self, h):
+        for row in range(self.row):
+            print(str(row).ljust(8), '')
+            for col in range(self.col):
+                print(str(h[row][col]).ljust(8), '')
+            print()
+        print(''.ljust(30, '-'))
+
+        print(''.ljust(8))
+        for i in range(self.col):
+            print(str(i).ljust(8))
 
     def ab_update_move_h(self, col, row, move, h, alpha, beta, turn, cur_depth, player):
         break_flag = False
