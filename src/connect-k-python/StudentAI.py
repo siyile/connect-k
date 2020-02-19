@@ -14,13 +14,13 @@ CLEAR = 0
 MIN_TURN = 0
 MAX_TURN = 1
 RANDOM = False
-WIN_CODE = 2000000
+WIN_CODE = 2000
 LOSE_CODE = -WIN_CODE
-MAX_VALUE = 100000
+MAX_VALUE = 1000000
 MIN_VALUE = -MAX_VALUE
 
 
-depth = {(0, 5): 4, (0, 7): 3, (1, 5): 8, (1, 7): 8, (1, 6): 7, (1, 8): 5}
+depth = {(0, 5): 4, (0, 7): 3, (1, 5): 6, (1, 7): 9, (1, 6): 7, (1, 8): 5}
 
 WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
 
@@ -61,7 +61,7 @@ class StudentAI():
                 self.player2 = PLAYER2
 
                 if self.g == 1:
-                    move = [self.col // 2, 0]
+                    move = [self.col // 2, self.row - 1]
                     self.myBoard.move(move[0], move[1], self.player1)
                     return Move(move[0], move[1])
                 else:
@@ -150,22 +150,25 @@ class StudentAI():
                         # TODO: remove
                         if cur_depth == self.limit:
                             heuristic_list[row][col] = WIN_CODE
+                            self.print_heuristic(heuristic_list)
 
                         return move, WIN_CODE
                     elif winner == self.player2:
                         h = max(LOSE_CODE, h)
                     else:
                         _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
-                        # TODO: remove
-                        if cur_depth == self.limit:
-                            heuristic_list[row][col] = h
 
                         if h_star > h:
                             h = h_star
                             move[0] = col
                             move[1] = row
 
-                    alpha = max(alpha, h)
+                        # TODO: remove
+                        if cur_depth == self.limit:
+                            heuristic_list[row][col] = h
+
+                    if h != MAX_VALUE:
+                        alpha = max(alpha, h)
 
                 # MIN_TURN
                 else:
@@ -180,7 +183,8 @@ class StudentAI():
 
                         h = min(h_star, h)
 
-                    beta = min(beta, h)
+                    if h != MIN_VALUE:
+                        beta = min(beta, h)
 
                 # clear move
                 self.myBoard.clear_move(col, row)
