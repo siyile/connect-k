@@ -1,9 +1,5 @@
 from random import randint
-from BoardClasses import Move
-from BoardClasses import Board
-from MyBoard import MyBoard
 from Heuristic import *
-from GravityHeuristic import *
 
 # The following part should be completed by students.
 # Students can modify anything except the class name and exisiting functions and varibles.
@@ -20,13 +16,8 @@ MAX_VALUE = 1000000
 MIN_VALUE = -MAX_VALUE
 
 
-depth = {(0, 5): 4, (0, 7): 3, (1, 5): 6, (1, 7): 9, (1, 6): 7, (1, 8): 5}
-
+DEPTH = {(0, 5): 4, (0, 7): 3, (1, 5): 9, (1, 7): 7}
 WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
-
-
-def heuristic_random():
-    return randint(-100000, 100000)
 
 
 class StudentAI():
@@ -47,10 +38,9 @@ class StudentAI():
         self.k = k
         self.board = Board(col, row, k, g)
         self.myBoard = MyBoard(col, row, k, g)
-        self.heuristic = Heuristic(WEIGHTS)
-        self.heuristic_g = GravityHeuristic(WEIGHTS)
+        self.heuristic = GravityHeuristic(WEIGHTS) if g else NonGravityHeuristic(WEIGHTS)
         try:
-            self.limit = depth[(g, col)]
+            self.limit = DEPTH[(g, col)]
         except:
             self.limit = 5 if g else 3
 
@@ -82,7 +72,7 @@ class StudentAI():
 
         move, h = self.ab_minimax(self.limit, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
-        if h == LOSE_CODE or h == MIN_VALUE:
+        if h == LOSE_CODE or h == MIN_VALUE or move[0] == -1 or move[1] == -1:
             move, h = self.ab_minimax(2, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
         self.myBoard.move(move[0], move[1], self.player1)
@@ -111,7 +101,7 @@ class StudentAI():
 
         # TODO: remove
         if cur_depth == self.limit:
-            heuristic_list = [[0 for x in range(self.col)] for y in range (self.row)]
+            heuristic_list = [[0 for x in range(self.col)] for y in range(self.row)]
 
         if self.g == 0:
             for a in range(self.col):
@@ -140,6 +130,7 @@ class StudentAI():
                 # make move
                 self.myBoard.move(col, row, player)
 
+                # MAX_TURN
                 if turn == MAX_TURN:
                     winner = self.myBoard.is_win()
                     if winner == self.player1 or winner == -1:
@@ -285,9 +276,6 @@ class StudentAI():
 
     def cal_heru(self):
         if RANDOM:
-            return [], heuristic_random()
+            return [], randint(-100000, 100000)
         else:
-            if self.g == 1:
-                return [], self.heuristic_g.eval_board(self.player1, self.player2, self.myBoard)
-            else:
-                return [], self.heuristic.eval_board(Player(self.player1), self.myBoard)
+            return [], self.heuristic.eval_board(self.player1, self.myBoard)
