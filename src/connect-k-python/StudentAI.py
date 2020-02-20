@@ -85,6 +85,9 @@ class StudentAI():
                 move, h = self.ab_minimax(depth, MAX_TURN, MIN_VALUE, MAX_VALUE)
                 depth -= 1
 
+        print('My turn! I play col: {}, row: {}\n Your turn plz XD!'.format(move[0], move[1]))
+        print()
+
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
             return Move(move[0], move[1])
@@ -98,31 +101,89 @@ class StudentAI():
         """
         # check if is target
         if cur_depth == 0:
-            h = self.cal_heru()
+            h = self.cal_heuristic()
             return h
 
         h = MIN_VALUE if turn == MAX_TURN else MAX_VALUE
         player = self.player1 if turn == MAX_TURN else self.player2
 
-        break_flag = False
         move = [-1, -1]
 
         # TODO: remove
         if cur_depth == self.limit:
             heuristic_list = [[0 for x in range(self.col)] for y in range(self.row)]
 
+        # without gravity
         if self.g == 0:
             for a in range(self.col):
                 i = (self.col + (~a, a)[a % 2]) // 2
                 for b in range(self.row):
                     j = (self.row + (~b, b)[b % 2]) // 2
-                    if self.myBoard.is_valid_move(i, j, True):
-                        break_flag, move, h, alpha, beta = self.ab_update_move_h(i, j, move, h, alpha, beta, turn,
-                                                                                 cur_depth, player)
-                        if break_flag:
-                            break
-                if break_flag:
+
+                    col = i
+                    row = j
+
+                    if not self.myBoard.check_space(col, row):
+                        continue
+
+                    # make move
+                    self.myBoard.move(col, row, player)
+
+                    # MAX_TURN
+                    if turn == MAX_TURN:
+                        winner = self.myBoard.is_win()
+                        if winner == self.player1 or winner == -1:
+                            move[0] = col
+                            move[1] = row
+                            self.myBoard.clear_move(col, row)
+
+                            # TODO: remove
+                            if cur_depth == self.limit:
+                                heuristic_list[row][col] = WIN_CODE
+                                self.print_heuristic(heuristic_list)
+
+                            return move, WIN_CODE
+                        elif winner == self.player2:
+                            h = max(LOSE_CODE, h)
+                        else:
+                            _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
+
+                            if h_star > h:
+                                h = h_star
+                                move[0] = col
+                                move[1] = row
+
+                            # TODO: remove
+                            if cur_depth == self.limit:
+                                heuristic_list[row][col] = h
+
+                        if h != MAX_VALUE:
+                            alpha = max(alpha, h)
+
+                    # MIN_TURN
+                    else:
+                        winner = self.myBoard.is_win()
+                        if winner == self.player2:
+                            self.myBoard.clear_move(col, row)
+                            return [], LOSE_CODE
+                        elif winner == self.player1:
+                            h = min(h, WIN_CODE)
+                        else:
+                            _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta)
+
+                            h = min(h_star, h)
+
+                        if h != MIN_VALUE:
+                            beta = min(beta, h)
+
+                    # clear move
+                    self.myBoard.clear_move(col, row)
+
+                    if beta <= alpha:
+                        break
+                if beta <= alpha:
                     break
+
         # with gravity
         else:
             for a in range(self.col):
@@ -218,71 +279,7 @@ class StudentAI():
         print()
         print()
 
-    def ab_update_move_h(self, col, row, move, h, alpha, beta, turn, cur_depth, player):
-        break_flag = False
-
-        # make move
-        self.myBoard.move(col, row, player)
-
-        if turn == MAX_TURN:
-            if self.myBoard.is_win() == self.player1:
-                move[0] = col
-                move[1] = row
-                self.myBoard.clear_move(col, row)
-
-                return True, move, WIN_CODE, alpha, beta
-
-            _, h_star = self.ab_minimax(cur_depth - 1, MIN_TURN, alpha, beta)
-
-            if h_star == WIN_CODE:
-                move[0] = col
-                move[1] = row
-                self.myBoard.clear_move(col, row)
-
-                return True, move, WIN_CODE, alpha, beta
-
-            elif h_star != LOSE_CODE:
-                if h_star > h:
-                    h = h_star
-                    move[0] = col
-                    move[1] = row
-
-                alpha = max(alpha, h_star)
-        # MIN_TURN
-        else:
-            if self.myBoard.is_win() == self.player2:
-                move[0] = col
-                move[1] = row
-                self.myBoard.clear_move(col, row)
-
-                return True, move, LOSE_CODE, alpha, beta
-
-            _, h_star = self.ab_minimax(cur_depth - 1, MAX_TURN, alpha, beta)
-
-            if h_star == LOSE_CODE:
-                move[0] = col
-                move[1] = row
-                self.myBoard.clear_move(col, row)
-
-                return True, move, LOSE_CODE, alpha, beta
-
-            elif h_star != WIN_CODE:
-                if h_star < h:
-                    h = h_star
-                    move[0] = col
-                    move[1] = row
-
-                beta = min(beta, h_star)
-
-        if beta <= alpha:
-            break_flag = True
-
-        # clear move
-        self.myBoard.clear_move(col, row)
-
-        return break_flag, move, h, alpha, beta
-
-    def cal_heru(self):
+    def cal_heuristic(self):
         if RANDOM:
             return [], randint(-100000, 100000)
         else:
