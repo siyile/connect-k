@@ -1,8 +1,4 @@
-from BoardClasses import Board, Move
-
-
-class InvalidMoveError(Exception):
-    pass
+from BoardClasses import *
 
 
 class MyBoard(Board):

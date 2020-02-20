@@ -181,33 +181,33 @@ class GravityHeuristic(Heuristic):
         self.opponent_threat = set()
 
         # eval player & opponent horizontal
-        self.eval_horizontal_lines(True)
-        self.eval_horizontal_lines(False)
+        self.__eval_horizontal_lines(True)
+        self.__eval_horizontal_lines(False)
 
         # eval player & opponent vertical
-        self.eval_vertical_lines(True)
-        self.eval_vertical_lines(False)
+        self.__eval_vertical_lines(True)
+        self.__eval_vertical_lines(False)
 
         # eval diagonals
-        self.eval_left_top_diagonals(True)
-        self.eval_top_right_diagonals(True)
-        self.eval_left_top_diagonals(False)
-        self.eval_top_right_diagonals(False)
+        self.__eval_left_top_diagonals(True)
+        self.__eval_top_right_diagonals(True)
+        self.__eval_left_top_diagonals(False)
+        self.__eval_top_right_diagonals(False)
 
         # calculate threats count
-        player_threat_cnt = self.calculate_threats(self.player_threat, self.opponent_threat)
-        opponent_threat_cnt = self.calculate_threats(self.opponent_threat, self.player_threat)
+        player_threat_cnt = self.__calculate_threats(self.player_threat, self.opponent_threat)
+        opponent_threat_cnt = self.__calculate_threats(self.opponent_threat, self.player_threat)
 
         score = 0
         if self.player == 1:
-            score += self.calculate_score(player_threat_cnt, opponent_threat_cnt)
+            score += self.__calculate_score(player_threat_cnt, opponent_threat_cnt)
         else:
-            score -= self.calculate_score(opponent_threat_cnt, player_threat_cnt)
+            score -= self.__calculate_score(opponent_threat_cnt, player_threat_cnt)
 
-        return self.get_heuristic(score)
+        return self.__get_heuristic(score)
 
-    def eval_horizontal_lines(self, is_player: bool):
-        player, opponent, empty = self.init_player_and_empty_slot(is_player)
+    def __eval_horizontal_lines(self, is_player: bool):
+        player, opponent, empty = self.__init_player_and_empty_slot(is_player)
 
         for i in range(self.row):
             for j in range(0, self.col - self.k + 1, 1):
@@ -225,10 +225,10 @@ class GravityHeuristic(Heuristic):
                     cur_col += 1
 
                 if not stop_flag:
-                    self.add_threat(is_player, empty, cnt)
+                    self.__add_threat(is_player, empty, cnt)
 
-    def eval_vertical_lines(self, is_player: bool):
-        player, opponent, empty = self.init_player_and_empty_slot(is_player)
+    def __eval_vertical_lines(self, is_player: bool):
+        player, opponent, empty = self.__init_player_and_empty_slot(is_player)
 
         for j in range(self.col):
             for i in range(self.row - 1, -1, self.k - 2):
@@ -246,10 +246,10 @@ class GravityHeuristic(Heuristic):
                     cur_row -= 1
 
                 if not stop_flag:
-                    self.add_threat(is_player, empty, cnt)
+                    self.__add_threat(is_player, empty, cnt)
 
-    def eval_top_right_diagonals(self, is_player: bool):
-        player, opponent, empty = self.init_player_and_empty_slot(is_player)
+    def __eval_top_right_diagonals(self, is_player: bool):
+        player, opponent, empty = self.__init_player_and_empty_slot(is_player)
 
         for i in range(self.row - 1, -1, self.k - 2):
             for j in range(0, 1, self.col - self.k + 1):
@@ -270,10 +270,10 @@ class GravityHeuristic(Heuristic):
                     cur_col += 1
 
                 if not stop_flag:
-                    self.add_threat(is_player, empty, cnt)
+                    self.__add_threat(is_player, empty, cnt)
 
-    def eval_left_top_diagonals(self, is_player: bool):
-        player, opponent, empty = self.init_player_and_empty_slot(is_player)
+    def __eval_left_top_diagonals(self, is_player: bool):
+        player, opponent, empty = self.__init_player_and_empty_slot(is_player)
 
         for i in range(self.row - 1, -1, self.k - 2):
             for j in range(self.col - 1, -1, self.k - 2):
@@ -294,15 +294,15 @@ class GravityHeuristic(Heuristic):
                     cur_row -= 1
 
                 if not stop_flag:
-                    self.add_threat(is_player, empty, cnt)
+                    self.__add_threat(is_player, empty, cnt)
 
-    def init_player_and_empty_slot(self, is_player: bool):
+    def __init_player_and_empty_slot(self, is_player: bool):
         player = self.player if is_player else self.opponent
         opponent = self.opponent if is_player else self.player
         empty = Slot(self.row - 1, 0)
         return player, opponent, empty
 
-    def add_threat(self, is_player: bool, empty, cnt, is_vertical: bool = False):
+    def __add_threat(self, is_player: bool, empty, cnt, is_vertical: bool = False):
         """
         add threat into corresponding target
         """
@@ -327,7 +327,7 @@ class GravityHeuristic(Heuristic):
             else:
                 self.opponent_lines[cnt] += 1
 
-    def calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
+    def __calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
         player_threats_cnt = Threat()
 
         unshared_odd = set()
@@ -359,7 +359,7 @@ class GravityHeuristic(Heuristic):
 
         return player_threats_cnt
 
-    def calculate_score(self, pcnt: Threat, ocnt: Threat):
+    def __calculate_score(self, pcnt: Threat, ocnt: Threat):
         player_score = 0
         opponent_score = 0
 
@@ -397,7 +397,7 @@ class GravityHeuristic(Heuristic):
 
         return player_score - opponent_score
 
-    def get_heuristic(self, h):
+    def __get_heuristic(self, h):
         if self.opponent_lines[self.k] > 0:
             return LOSE_CODE
         if self.player_lines[self.k] > 0:
