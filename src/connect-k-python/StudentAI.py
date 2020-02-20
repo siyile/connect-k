@@ -16,7 +16,7 @@ MAX_VALUE = 1000000
 MIN_VALUE = -MAX_VALUE
 
 
-DEPTH = {(0, 5): 5, (0, 4): 3, (1, 5): 9, (1, 7): 7}
+DEPTH = {(0, 5): 5, (0, 7): 4, (1, 5): 9, (1, 7): 7}
 WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
 
 
@@ -28,7 +28,7 @@ class StudentAI():
     # player1 is me, player 2 is opponent
     player1 = -1
     player2 = -1
-    
+
     limit = 10
 
     def __init__(self, col, row, k, g):
@@ -76,13 +76,13 @@ class StudentAI():
             move, h = self.ab_minimax(2, MAX_TURN, MIN_VALUE, MAX_VALUE)
 
         valid_move = False
-        depth = 3
+        depth = self.limit - 1
         while (not valid_move) and depth > 0:
             try:
                 self.myBoard.move(move[0], move[1], self.player1)
                 valid_move = True
             except InvalidMoveError:
-                move, h = self.ab_minimax(self.limit - 1, MAX_TURN, MIN_VALUE, MAX_VALUE)
+                move, h = self.ab_minimax(depth, MAX_TURN, MIN_VALUE, MAX_VALUE)
                 depth -= 1
 
         # g = 1 has gravity, 0 no gravity
