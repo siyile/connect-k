@@ -195,6 +195,12 @@ class Threat:
     shared_odd = 0
     shared_even = 0
 
+    @property
+    def odds(self): return self.unshared_odd + self.shared_odd
+
+    @property
+    def evens(self): return self.unshared_even + self.shared_even
+
 
 class GravityHeuristic(Heuristic):
     """
@@ -384,6 +390,9 @@ class GravityHeuristic(Heuristic):
             else:
                 self.opponent_lines[cnt] += 1
 
+    """
+    a threat is shared when it can contribute to a threat to its opponent 
+    """
     def __calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
         player_threats_cnt = Threat()
 
@@ -417,42 +426,21 @@ class GravityHeuristic(Heuristic):
         return player_threats_cnt
 
     def __calculate_score(self, pcnt: Threat, ocnt: Threat):
-        player_score = 0
-        opponent_score = 0
+        res = 0
 
-        if self.row % 2 == 0:
-            if (pcnt.unshared_odd - 1) == ocnt.unshared_odd or \
-                    (pcnt.unshared_odd == ocnt.unshared_odd) and (pcnt.shared_odd % 2 == 1) or \
-                    ocnt.unshared_odd == 0 and (pcnt.shared_odd + pcnt.unshared_odd) % 2 == 1:
-                player_score += 100
-            if (pcnt.unshared_odd + pcnt.shared_odd) == 0 and (ocnt.shared_even + ocnt.unshared_even) > 0 or \
-                    (ocnt.unshared_odd - 2) == pcnt.unshared_odd or \
-                    (pcnt.unshared_odd == ocnt.unshared_odd) and (ocnt.shared_odd % 2 == 0 and ocnt.shared_odd > 0) or \
-                    (ocnt.unshared_odd - 1) == pcnt.unshared_odd and ocnt.shared_odd > 0 or \
-                    pcnt.unshared_odd == 0 and (ocnt.unshared_odd == 1 and ocnt.shared_odd > 0) or \
-                    ((ocnt.unshared_odd + ocnt.shared_odd) % 2 == 0 and (ocnt.unshared_odd + ocnt.shared_odd) > 0) and pcnt.unshared_odd == 0:
-                opponent_score += 100
+        if pcnt.odds > 0:
+            res += 100
+        elif pcnt.evens % 2 == 0 and pcnt.evens > 0 \
+                and (pcnt.shared_even == ocnt.shared_even or pcnt.unshared_even == ocnt.unshared_even + 2):
+            res += 100
 
-        elif (self.row * self.col) % 2 == 0 and self.row % 2 == 1:
-            if (pcnt.unshared_even - 1) == ocnt.unshared_even or \
-                    pcnt.shared_even % 2 == 1 or \
-                    (pcnt.shared_even + pcnt.unshared_even) == 1 and (ocnt.shared_odd + ocnt.unshared_odd) == 1:
-                player_score += 100
+        if ocnt.unshared_even == pcnt.unshared_even + 1:
+            res -= 100
+        elif ocnt.shared_even % 2 == 1 or \
+                (ocnt.shared_even + ocnt.unshared_even == 1 and pcnt.shared_odd + pcnt.unshared_odd == 1):
+            res -= 100
 
-            if (ocnt.shared_odd + ocnt.unshared_odd) > 0 or \
-                    (((ocnt.shared_even + ocnt.unshared_even) % 2 == 0 and (ocnt.shared_even + ocnt.unshared_even) > 0) and (((ocnt.unshared_even - 2) == pcnt.unshared_even) or (ocnt.shared_even == pcnt.shared_even))):
-                opponent_score += 100
-
-        elif (self.row * self.col) % 2 == 1:
-            if ((pcnt.shared_odd + pcnt.unshared_odd) > 0) or \
-                    (((pcnt.shared_even + pcnt.unshared_even) % 2 == 0 and (pcnt.shared_even + pcnt.unshared_even) > 0) and ((pcnt.unshared_even - 2 == ocnt.unshared_even) or (pcnt.shared_even == ocnt.shared_even))):
-                player_score += 100
-
-            if (ocnt.unshared_even - 1 == pcnt.unshared_even) or \
-                    (ocnt.shared_even % 2 == 1) or ((ocnt.shared_even + ocnt.unshared_even) == 1 and (pcnt.shared_odd + pcnt.unshared_odd) == 1):
-                opponent_score += 100
-
-        return player_score - opponent_score
+        return res
 
     def __get_heuristic(self, h):
         if self.opponent_lines[self.k] > 0:
@@ -460,11 +448,9 @@ class GravityHeuristic(Heuristic):
         if self.player_lines[self.k] > 0:
             return WIN_CODE
 
-        multiplier = 1
         for i in range(2, self.k, 1):
-            h += multiplier * self.player_lines[i]
-            h -= multiplier * self.opponent_lines[i]
-            multiplier += 1
+            h += (i - 1) * self.player_lines[i]
+            h -= (i - 1) * self.opponent_lines[i]
 
         if h == 0:
             if self.player == 2:
