@@ -194,12 +194,18 @@ class Threat:
     unshared_even = 0
     shared_odd = 0
     shared_even = 0
+    total_odds = 0
+    total_evens = 0
 
     @property
-    def odds(self): return self.unshared_odd + self.shared_odd
+    def odds(self):
+        # return self.unshared_odd + self.shared_odd
+        return self.total_odds
 
     @property
-    def evens(self): return self.unshared_even + self.shared_even
+    def evens(self):
+        return self.total_evens
+        # return self.unshared_even + self.shared_even
 
 
 class GravityHeuristic(Heuristic):
@@ -400,28 +406,37 @@ class GravityHeuristic(Heuristic):
         unshared_even = set()
         shared_odd = set()
         shared_even = set()
+        odds = set()
+        evens = set()
 
         for player_threat in player_threats:
-            shared = False
-            for opponent_threat in opponent_threats:
-                if player_threat.col == opponent_threat.col and player_threat.row <= opponent_threat.row:
-                    shared = True
-                    break
+            # shared = False
+            # for opponent_threat in opponent_threats:
+            #     if player_threat.col == opponent_threat.col and player_threat.row <= opponent_threat.row:
+            #         shared = True
+            #         break
 
-            if shared:
-                if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in shared_odd:
-                    player_threats_cnt.shared_odd += 1
-                    shared_odd.add(player_threat.col)
-                elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in shared_even:
-                    player_threats_cnt.shared_even += 1
-                    shared_even.add(player_threat.col)
-            else:
-                if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in unshared_odd:
-                    player_threats_cnt.unshared_odd += 1
-                    unshared_odd.add(player_threat.col)
-                elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in unshared_even:
-                    player_threats_cnt.unshared_even += 1
-                    unshared_even.add(player_threat.col)
+            if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in odds:
+                player_threats_cnt.total_odds += 1
+                odds.add(player_threat.col)
+            elif (self.row - player_threat.row) % 2 == 1 and player_threat.col not in evens:
+                player_threats_cnt.total_evens += 1
+                evens.add(player_threat.col)
+            #
+            # if shared:
+            #     if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in shared_odd:
+            #         player_threats_cnt.shared_odd += 1
+            #         shared_odd.add(player_threat.col)
+            #     elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in shared_even:
+            #         player_threats_cnt.shared_even += 1
+            #         shared_even.add(player_threat.col)
+            # else:
+            #     if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in unshared_odd:
+            #         player_threats_cnt.unshared_odd += 1
+            #         unshared_odd.add(player_threat.col)
+            #     elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in unshared_even:
+            #         player_threats_cnt.unshared_even += 1
+            #         unshared_even.add(player_threat.col)
 
         return player_threats_cnt
 
