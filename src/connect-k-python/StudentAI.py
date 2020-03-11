@@ -1,4 +1,3 @@
-from random import randint
 from typing import *
 from BoardClasses import *
 from abc import *
@@ -11,19 +10,13 @@ PLAYER2 = 2
 CLEAR = 0
 MIN_TURN = 0
 MAX_TURN = 1
-RANDOM = False
 WIN_CODE = 2000
 LOSE_CODE = -WIN_CODE
 MAX_VALUE = 1000000
 MIN_VALUE = -MAX_VALUE
 
-
 DEPTH = {(0, 5): 5, (0, 7): 4, (1, 5): 9, (1, 7): 7}
 WEIGHTS = [1, -0.5, 0.1, -1, 0, 0]
-
-# MAX_VALUE = 99999
-# WIN_CODE = 300000
-# LOSE_CODE = -300000
 
 
 class MyBoard(Board):
@@ -58,6 +51,8 @@ class MyBoard(Board):
         Heuristic
 ============================
 """
+
+
 class Heuristic(ABC):
     def __init__(self, weights: List[float]):
         if len(weights) != 6:
@@ -84,9 +79,11 @@ class NonGravityHeuristic(Heuristic):
         d_chances, d_threats = self.__count_diag(player, board, True)
         ad_chances, ad_threats = self.__count_diag(player, board, False)
         return self.weights[0] * (r_chances[player] + c_chances[player] + d_chances[player] + ad_chances[player]) + \
-               self.weights[1] * (r_chances[opponent] + c_chances[opponent] + d_chances[opponent] + ad_chances[opponent]) + \
+               self.weights[1] * (
+                           r_chances[opponent] + c_chances[opponent] + d_chances[opponent] + ad_chances[opponent]) + \
                self.weights[2] * (r_threats[player] + c_threats[player] + d_threats[player] + ad_threats[player]) + \
-               self.weights[3] * (r_threats[opponent] + c_threats[opponent] + d_threats[opponent] + ad_threats[opponent])
+               self.weights[3] * (
+                           r_threats[opponent] + c_threats[opponent] + d_threats[opponent] + ad_threats[opponent])
 
     def __count_row(self, player: int, board: Board):
         chances = {1: 0, 2: 0}
@@ -162,6 +159,7 @@ class NonGravityHeuristic(Heuristic):
                 if not board.g:
                     threats[opponent] = MAX_VALUE
 
+
 """
 ============================
     Gravity Heuristic
@@ -190,22 +188,8 @@ class Slot:
 
 
 class Threat:
-    unshared_odd = 0
-    unshared_even = 0
-    shared_odd = 0
-    shared_even = 0
-    total_odds = 0
-    total_evens = 0
-
-    @property
-    def odds(self):
-        # return self.unshared_odd + self.shared_odd
-        return self.total_odds
-
-    @property
-    def evens(self):
-        return self.total_evens
-        # return self.unshared_even + self.shared_even
+    odds = 0
+    evens = 0
 
 
 class GravityHeuristic(Heuristic):
@@ -399,44 +383,20 @@ class GravityHeuristic(Heuristic):
     """
     a threat is shared when it can contribute to a threat to its opponent 
     """
+
     def __calculate_threats(self, player_threats: Set[Slot], opponent_threats: Set[Slot]):
         player_threats_cnt = Threat()
 
-        unshared_odd = set()
-        unshared_even = set()
-        shared_odd = set()
-        shared_even = set()
         odds = set()
         evens = set()
 
         for player_threat in player_threats:
-            # shared = False
-            # for opponent_threat in opponent_threats:
-            #     if player_threat.col == opponent_threat.col and player_threat.row <= opponent_threat.row:
-            #         shared = True
-            #         break
-
             if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in odds:
-                player_threats_cnt.total_odds += 1
+                player_threats_cnt.odds += 1
                 odds.add(player_threat.col)
             elif (self.row - player_threat.row) % 2 == 1 and player_threat.col not in evens:
-                player_threats_cnt.total_evens += 1
+                player_threats_cnt.evens += 1
                 evens.add(player_threat.col)
-            #
-            # if shared:
-            #     if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in shared_odd:
-            #         player_threats_cnt.shared_odd += 1
-            #         shared_odd.add(player_threat.col)
-            #     elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in shared_even:
-            #         player_threats_cnt.shared_even += 1
-            #         shared_even.add(player_threat.col)
-            # else:
-            #     if (self.row - player_threat.row) % 2 == 1 and player_threat.col not in unshared_odd:
-            #         player_threats_cnt.unshared_odd += 1
-            #         unshared_odd.add(player_threat.col)
-            #     elif (self.row - player_threat.row) % 2 == 0 and player_threat.col not in unshared_even:
-            #         player_threats_cnt.unshared_even += 1
-            #         unshared_even.add(player_threat.col)
 
         return player_threats_cnt
 
@@ -449,18 +409,6 @@ class GravityHeuristic(Heuristic):
 
         if pcnt.odds == 0 and ocnt.evens > pcnt.evens:
             res -= 100
-
-        # if pcnt.odds > 0:
-        #     res += 100
-        # elif pcnt.evens % 2 == 0 and pcnt.evens > 0 \
-        #         and (pcnt.shared_even == ocnt.shared_even or pcnt.unshared_even == ocnt.unshared_even + 2):
-        #     res += 100
-        #
-        # if ocnt.unshared_even == pcnt.unshared_even + 1:
-        #     res -= 100
-        # elif ocnt.shared_even % 2 == 1 or \
-        #         (ocnt.shared_even + ocnt.unshared_even == 1 and pcnt.shared_odd + pcnt.unshared_odd == 1):
-        #     res -= 100
 
         return res
 
@@ -482,12 +430,15 @@ class GravityHeuristic(Heuristic):
 
         return h
 
+
 """
 ============================
         StudentAI
 ============================
 """
-class StudentAI():
+
+
+class StudentAI:
     col = 0
     row = 0
     k = 0
@@ -552,9 +503,6 @@ class StudentAI():
                 move, h = self.ab_minimax(depth, MAX_TURN, MIN_VALUE, MAX_VALUE)
                 depth -= 1
 
-        print('My turn! I play col: {}, row: {}\n Your turn plz XD!'.format(move[0], move[1]))
-        print()
-
         # g = 1 has gravity, 0 no gravity
         if self.g == 0:
             return Move(move[0], move[1])
@@ -575,10 +523,6 @@ class StudentAI():
         player = self.player1 if turn == MAX_TURN else self.player2
 
         move = [-1, -1]
-
-        # TODO: remove
-        if cur_depth == self.limit:
-            heuristic_list = [[0 for x in range(self.col)] for y in range(self.row)]
 
         # without gravity
         if self.g == 0:
@@ -604,11 +548,6 @@ class StudentAI():
                             move[1] = row
                             self.myBoard.clear_move(col, row)
 
-                            # TODO: remove
-                            if cur_depth == self.limit:
-                                heuristic_list[row][col] = WIN_CODE
-                                self.print_heuristic(heuristic_list)
-
                             return move, WIN_CODE
                         elif winner == self.player2:
                             h = max(LOSE_CODE, h)
@@ -619,10 +558,6 @@ class StudentAI():
                                 h = h_star
                                 move[0] = col
                                 move[1] = row
-
-                            # TODO: remove
-                            if cur_depth == self.limit:
-                                heuristic_list[row][col] = h
 
                         if h != MAX_VALUE:
                             alpha = max(alpha, h)
@@ -674,11 +609,6 @@ class StudentAI():
                         move[1] = row
                         self.myBoard.clear_move(col, row)
 
-                        # TODO: remove
-                        if cur_depth == self.limit:
-                            heuristic_list[row][col] = WIN_CODE
-                            self.print_heuristic(heuristic_list)
-
                         return move, WIN_CODE
                     elif winner == self.player2:
                         h = max(LOSE_CODE, h)
@@ -689,10 +619,6 @@ class StudentAI():
                             h = h_star
                             move[0] = col
                             move[1] = row
-
-                        # TODO: remove
-                        if cur_depth == self.limit:
-                            heuristic_list[row][col] = h
 
                     if h != MAX_VALUE:
                         alpha = max(alpha, h)
@@ -719,35 +645,7 @@ class StudentAI():
                 if beta <= alpha:
                     break
 
-        # TODO: remove
-        if self.limit == cur_depth:
-            self.print_heuristic(heuristic_list)
-
         return move, h
 
-    def print_heuristic(self, h):
-        for row in range(self.row):
-            print(str(row).ljust(8), end='')
-            for col in range(self.col):
-                if h[row][col] == WIN_CODE:
-                    s = "WIN"
-                elif h[row][col] == LOSE_CODE:
-                    s = "LOSE"
-                else:
-                    s = str(h[row][col])
-                print(s.ljust(8), end='')
-            print()
-        print(''.ljust(100, '-'))
-
-        print(''.ljust(8), end='')
-        for i in range(self.col):
-            print(str(i).ljust(8), end='')
-
-        print()
-        print()
-
     def cal_heuristic(self):
-        if RANDOM:
-            return [], randint(-100000, 100000)
-        else:
-            return [], self.heuristic.eval_board(self.player1, self.myBoard)
+        return [], self.heuristic.eval_board(self.player1, self.myBoard)
