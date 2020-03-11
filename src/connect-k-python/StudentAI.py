@@ -427,18 +427,25 @@ class GravityHeuristic(Heuristic):
 
     def __calculate_score(self, pcnt: Threat, ocnt: Threat):
         res = 0
-
-        if pcnt.odds > 0:
-            res += 100
-        elif pcnt.evens % 2 == 0 and pcnt.evens > 0 \
-                and (pcnt.shared_even == ocnt.shared_even or pcnt.unshared_even == ocnt.unshared_even + 2):
+        if pcnt.odds > 0 and ocnt.odds == 0 or \
+                pcnt.odds > ocnt.odds and ocnt.evens == 0 or \
+                pcnt.odds == 0 and ocnt.odds == 0 and pcnt.evens >= ocnt.evens:
             res += 100
 
-        if ocnt.unshared_even == pcnt.unshared_even + 1:
+        if pcnt.odds == 0 and ocnt.evens > pcnt.evens:
             res -= 100
-        elif ocnt.shared_even % 2 == 1 or \
-                (ocnt.shared_even + ocnt.unshared_even == 1 and pcnt.shared_odd + pcnt.unshared_odd == 1):
-            res -= 100
+
+        # if pcnt.odds > 0:
+        #     res += 100
+        # elif pcnt.evens % 2 == 0 and pcnt.evens > 0 \
+        #         and (pcnt.shared_even == ocnt.shared_even or pcnt.unshared_even == ocnt.unshared_even + 2):
+        #     res += 100
+        #
+        # if ocnt.unshared_even == pcnt.unshared_even + 1:
+        #     res -= 100
+        # elif ocnt.shared_even % 2 == 1 or \
+        #         (ocnt.shared_even + ocnt.unshared_even == 1 and pcnt.shared_odd + pcnt.unshared_odd == 1):
+        #     res -= 100
 
         return res
 
